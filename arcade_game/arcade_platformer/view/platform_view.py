@@ -337,6 +337,8 @@ class PlatformerView(arcade.View):
                 self.game_player.move_right()
             elif self.current_command == "jump":
                 self.game_player.jump()
+            elif self.current_command == "stop":
+                self.game_player.stop()
 
         # Update the player animation
         self.player.update_animation(delta_time)

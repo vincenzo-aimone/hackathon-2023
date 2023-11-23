@@ -24,6 +24,9 @@ def speech_to_text_continuous(message_queue: Queue, api_key: str, speech_region:
         nonlocal done
         done = True
 
+    def recognizing_speech(event: SpeechRecognitionEventArgs):
+        logger.info(f"Recognizing: {event.result.text}")
+
     def recognized_speech(event: SpeechRecognitionEventArgs):
         logger.info(f"Recognized: {event.result.text}")
 
@@ -42,13 +45,16 @@ def speech_to_text_continuous(message_queue: Queue, api_key: str, speech_region:
         if "jump" in event.result.text.lower():
             message_queue.put("jump")
 
+        if "stop" in event.result.text.lower():
+            message_queue.put("stop")
+
     # Init engine
     speech_config = speechsdk.SpeechConfig(subscription=api_key, region=speech_region)
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
     # Define Callbacks
-    speech_recognizer.recognizing.connect(lambda evt: logger.info(f'RECOGNIZING: {evt.result.text}'))
+    speech_recognizer.recognizing.connect(recognizing_speech)
     speech_recognizer.recognized.connect(recognized_speech)
 
     speech_recognizer.session_started.connect(lambda evt: logger.info(f'SESSION STARTED: {evt}'))

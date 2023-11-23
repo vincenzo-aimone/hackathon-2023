@@ -100,3 +100,8 @@ class Player:
             self.player.change_y = PLAYER_JUMP_SPEED
             # Play the jump sound
             arcade.play_sound(self.jump_sound)
+
+    def stop(self):
+        self.player.change_x = 0
+        self.player.change_y = 0
+        
