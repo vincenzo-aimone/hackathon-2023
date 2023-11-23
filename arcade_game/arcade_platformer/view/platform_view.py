@@ -166,6 +166,15 @@ class PlatformerView(arcade.View):
             "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
         self.recognize_proc.start()
 
+    def update_player_direction(self):
+        """
+        This process will wait for a command from the speech recognition process
+        and will update the player direction accordingly
+        """
+
+        # print hello world to check if the process is running
+        print("Hello World")
+
     def get_game_time(self) -> int:
         """Returns the number of seconds since the game was initialised"""
         return int(default_timer() - self.time_start)
@@ -312,6 +321,22 @@ class PlatformerView(arcade.View):
         Arguments:
             delta_time {float} -- How much time since the last call
         """
+
+        # Check if we have a command from the speech recognition process
+        if not self.message_queue.empty():
+            self.current_command = self.message_queue.get()
+
+            # Process the command
+            if self.current_command == "up":
+                self.game_player.move_up()
+            elif self.current_command == "down":
+                self.game_player.move_down()
+            elif self.current_command == "left":
+                self.game_player.move_left()
+            elif self.current_command == "right":
+                self.game_player.move_right()
+            elif self.current_command == "jump":
+                self.game_player.jump()
 
         # Update the player animation
         self.player.update_animation(delta_time)
