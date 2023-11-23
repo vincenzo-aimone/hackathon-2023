@@ -78,8 +78,12 @@ class PlatformerView(arcade.View):
         )
 
         # Init object for the process
-        self.recognize_proc = None
-        self.message_queue = None
+        self.message_queue = Queue()
+        self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
+            "message_queue": self.message_queue,
+            "api_key": os.environ.get('SPEECH_API_KEY'),
+            "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
+        self.recognize_proc.start()
         self.current_command = None
 
         # Play the game start sound animation
@@ -158,14 +162,6 @@ class PlatformerView(arcade.View):
         )
         self.game_player.set_physics_engine(self.physics_engine)
 
-        # Start the process for Speech Recognition
-        self.message_queue = Queue()
-        self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
-            "message_queue": self.message_queue,
-            "api_key": os.environ.get('SPEECH_API_KEY'),
-            "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
-        self.recognize_proc.start()
-
     def update_player_direction(self):
         """
         This process will wait for a command from the speech recognition process
@@ -242,8 +238,6 @@ class PlatformerView(arcade.View):
             - Send it back to the beginning of the level
             - Face the player forward
         """
-        # Stop the speech recognition process
-        self.recognize_proc.terminate()
 
         # Play the death sound
         arcade.play_sound(self.death_sound)
@@ -381,10 +375,9 @@ class PlatformerView(arcade.View):
         )
 
         if goals_hit:
-            # Stop the speech recognition process
-            self.recognize_proc.terminate()
-
             if self.level == 4:  # Game is finished : Victory !
+                # Stop the speech recognition process
+                self.recognize_proc.terminate()
                 self.handle_victory()
             else:
                 # Play the level victory sound
