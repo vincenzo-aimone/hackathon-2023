@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="25" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#a6e7ff" nextlayerid="11" nextobjectid="6">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="25" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#a6e7ff" nextlayerid="12" nextobjectid="7">
  <tileset firstgid="1" source="arcade_platformer.tsx"/>
  <layer id="1" name="ground" width="25" height="20">
   <data encoding="base64" compression="zlib">
    eAFjYBgFoyEwGgKjITAaAqMhQN8Q4AdaJ4iE+ahsPch8TiBmRsIcQDY2e5DdQQob3XyYXSB70M2BydGSBgCAVwIl
   </data>
  </layer>
+ <objectgroup id="11" name="enemies">
+  <object id="6" gid="192" x="768" y="2296" width="128" height="128">
+   <properties>
+    <property name="slow" type="float" value="0.4"/>
+   </properties>
+  </object>
+ </objectgroup>
  <layer id="2" name="background" width="25" height="20">
   <data encoding="base64" compression="zlib">
    eAFjYBgFoyEwGgKjITAaAqMhgD0EpmMXprtoI5KNuNyESxxJK5xZD2cNHwYAPOkCxg==

@@ -30,7 +30,7 @@ class PlatformerView(arcade.View):
         self.ladders = None
         self.goals = None
         self.traps = None
-        self.enemies = None
+        self.enemies = arcade.SpriteList() 
         self.enemies_dead = arcade.SpriteList()        
 
         # Avoids leaving the mouse pointer in the middle
