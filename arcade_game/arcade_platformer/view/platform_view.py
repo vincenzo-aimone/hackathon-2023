@@ -30,6 +30,8 @@ class PlatformerView(arcade.View):
         self.ladders = None
         self.goals = None
         self.traps = None
+        self.enemies = None
+        self.enemies_dead = arcade.SpriteList()        
 
         # Avoids leaving the mouse pointer in the middle
         self.window.set_mouse_visible(False)
@@ -126,6 +128,10 @@ class PlatformerView(arcade.View):
         # Only load traps in maps with some traps
         if "traps" in game_map.sprite_lists:
             self.traps = game_map.sprite_lists["traps"]
+
+        # Only load enemies in maps with some enemies
+        if "enemies" in game_map.sprite_lists:
+            self.enemies = game_map.sprite_lists["enemies"]
 
         # Set the background color
         background_color = arcade.color.FRESH_AIR
@@ -264,22 +270,22 @@ class PlatformerView(arcade.View):
 
         # Check for player left or right movement
         if key in [arcade.key.LEFT, arcade.key.J]:  # Either left key or J key to go left
-            self.player.change_x = -PLAYER_MOVE_SPEED
+            self.game_player.move_left()
         elif key in [arcade.key.RIGHT, arcade.key.L]:  # Either right key or L key to go right
-            self.player.change_x = PLAYER_MOVE_SPEED
-
+            self.game_player.move_right()
+            
         # Check if player can climb up or down
         elif key in [arcade.key.UP, arcade.key.I]:  # Either up key or I key to go up
             if self.physics_engine.is_on_ladder():
-                self.player.change_y = PLAYER_MOVE_SPEED
+                self.game_player.move_up()
         elif key in [arcade.key.DOWN, arcade.key.K]:  # Either down key or K key to down
             if self.physics_engine.is_on_ladder():
-                self.player.change_y = -PLAYER_MOVE_SPEED
-
+                self.game_player.move_down()
+                
         # Check if player can jump
         elif key == arcade.key.SPACE:
             if self.physics_engine.can_jump():
-                self.player.change_y = PLAYER_JUMP_SPEED
+                self.game_player.jump()
                 # Play the jump sound
                 arcade.play_sound(self.jump_sound)
 
@@ -315,6 +321,39 @@ class PlatformerView(arcade.View):
         Arguments:
             delta_time {float} -- How much time since the last call
         """
+
+        # Handle enemies animation
+        if self.enemies is not None:
+            for enemy in self.enemies:
+                enemy.update_animation(delta_time)
+
+        # Handle enemies movement
+        if self.enemies is not None:
+            for enemy in self.enemies:
+                # if there is speed property, the enemy moves horizontally (left or right)
+                if "speed" in enemy.properties:
+                    enemy.change_x = int(enemy.properties["speed"])
+                    # move the enemy
+                    enemy.center_x += enemy.change_x * delta_time
+                
+
+                
+        # Handle ground animation
+        for wall in self.walls:
+            wall.update_animation(delta_time)
+
+        # Handle coins animation
+        for coin in self.coins:
+            coin.update_animation(delta_time)
+
+        # Handle traps animation
+        if self.traps is not None:
+            for trap in self.traps:
+                trap.update_animation(delta_time)
+
+        # Handle player animation
+        self.player.update_animation(delta_time)
+
 
         # Check if we have a command from the speech recognition process
         if not self.message_queue.empty():
@@ -369,6 +408,38 @@ class PlatformerView(arcade.View):
                 self.handle_player_death()
                 return
 
+        # Check for enemy collision, only in maps with enemies
+        if self.enemies is not None:
+            enemy_hit = arcade.check_for_collision_with_list(
+                sprite=self.player, sprite_list=self.enemies
+            )
+
+            if enemy_hit:
+                # if the player collide with the enemy from the top, the enemy dies
+                if self.player.center_y > enemy_hit[0].center_y + 150:
+                    enemy_name = enemy_hit[0].properties["name"]
+                    enemy_hit[0].remove_from_sprite_lists()
+                    dead_sprite = arcade.Sprite(
+                        filename=str(ASSETS_PATH / "images" / "enemies" / f"{enemy_name}_dead.png"),
+                        scale=MAP_SCALING,
+                    )
+                    dead_sprite.center_x = enemy_hit[0].center_x
+                    dead_sprite.center_y = enemy_hit[0].center_y
+                    self.enemies_dead.append(dead_sprite)
+
+                    # play the enemy death sound
+                    arcade.play_sound(self.death_sound)
+                else:
+                    # if enemy has slow property, update the player speed multiplier
+                    if "slow" in enemy_hit[0].properties:
+                        # if the player is slowed down, dont schedule another speed multiplier reset
+                        if not self.game_player.is_slowed_down():                    
+                            self.game_player.slow_down(float(enemy_hit[0].properties["slow"]))
+                            def reset_speed_multiplier(value):
+                                self.game_player.reset_speed()
+                                arcade.unschedule(reset_speed_multiplier)
+                            arcade.schedule(reset_speed_multiplier, 5)
+
         # Now check if we are at the ending goal
         goals_hit = arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.goals
@@ -391,6 +462,8 @@ class PlatformerView(arcade.View):
         else:
             # Set the viewport, scrolling if necessary
             self.scroll_viewport()
+
+    
 
     def handle_game_over(self):
         """
@@ -428,6 +501,8 @@ class PlatformerView(arcade.View):
         self.walls.draw()
         self.coins.draw()
         self.goals.draw()
+        self.enemies.draw()
+        self.enemies_dead.draw()
 
         # Not all maps have ladders
         if self.ladders is not None:

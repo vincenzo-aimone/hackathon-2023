@@ -11,6 +11,7 @@ class Player:
     def __init__(self):
         self.player = self.create_player_sprite()
         self.physics_engine = None
+        self.speed_multiplier = 1
         self.jump_sound = arcade.load_sound(
             str(ASSETS_PATH / "sounds" / "jump.wav")
         )
@@ -81,27 +82,40 @@ class Player:
         return player
 
     def move_left(self):
-        self.player.change_x = -PLAYER_MOVE_SPEED
+        self.player.change_x = -PLAYER_MOVE_SPEED * self.speed_multiplier
 
     def move_right(self):
-        self.player.change_x = PLAYER_MOVE_SPEED
+        self.player.change_x = PLAYER_MOVE_SPEED * self.speed_multiplier
 
     def move_up(self):
         # Check if player can climb up or down
         if self.physics_engine.is_on_ladder():
-            self.player.change_y = PLAYER_MOVE_SPEED
+            self.player.change_y = PLAYER_MOVE_SPEED * self.speed_multiplier
 
     def move_down(self):
         if self.physics_engine.is_on_ladder():
-            self.player.change_y = -PLAYER_MOVE_SPEED
+            self.player.change_y = -PLAYER_MOVE_SPEED * self.speed_multiplier
 
     def jump(self):
         if self.physics_engine.can_jump():
-            self.player.change_y = PLAYER_JUMP_SPEED
+            self.player.change_y = PLAYER_JUMP_SPEED * self.speed_multiplier
             # Play the jump sound
             arcade.play_sound(self.jump_sound)
 
     def stop(self):
         self.player.change_x = 0
         self.player.change_y = 0
+        
+    def slow_down(self, value: float = 0.5):
+        self.speed_multiplier = value
+        self.player.change_x *= self.speed_multiplier
+        self.player.change_y *= self.speed_multiplier
+        
+    def reset_speed(self):
+        self.player.change_x /= self.speed_multiplier
+        self.player.change_y /= self.speed_multiplier
+        self.speed_multiplier = 1
+        
+    def is_slowed_down(self):
+        return self.speed_multiplier != 1
         
