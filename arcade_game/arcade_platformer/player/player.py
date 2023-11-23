@@ -19,8 +19,11 @@ class Player:
     def set_physics_engine(self, physics_engine: arcade.PhysicsEnginePlatformer):
         self.physics_engine = physics_engine
 
+    def set_player_num(self, player_num):
+        self.player = self.create_player_sprite(player_num)
+
     @staticmethod
-    def create_player_sprite() -> arcade.AnimatedWalkingSprite:
+    def create_player_sprite(player_num = 1) -> arcade.AnimatedWalkingSprite:
         """Creates the animated player sprite
 
         Returns:
@@ -30,13 +33,24 @@ class Player:
         texture_path = ASSETS_PATH / "images" / "player"
 
         # Set up the appropriate textures
-        walking_paths = [
-            texture_path / f"alienGreen_walk{x}.png" for x in (1, 2)
-        ]
         climbing_paths = [
             texture_path / f"alienGreen_climb{x}.png" for x in (1, 2)
         ]
-        standing_path = texture_path / "alienGreen_stand.png"
+        if player_num == 1:
+            standing_path = texture_path / "player1_alienGreen_stand.png"
+            walking_paths = [texture_path / f"player1_alienGreen_walk{x}.png" for x in (1, 2)]
+
+        if player_num == 2:
+            standing_path = texture_path / "player2_alienGreen_stand.png"
+            walking_paths = [texture_path / f"player2_alienGreen_walk{x}.png" for x in (1, 2)]
+
+        if player_num == 3:
+            standing_path = texture_path / "player3_alienGreen_stand.png"
+            walking_paths = [texture_path / f"player3_alienGreen_walk{x}.png" for x in (1, 2)]
+
+        if player_num == 4:
+            standing_path = texture_path / "player4_alienGreen_stand.png"
+            walking_paths = [texture_path / f"player4_alienGreen_walk{x}.png" for x in (1, 2)]
 
         # Load them all now
         walking_right_textures = [

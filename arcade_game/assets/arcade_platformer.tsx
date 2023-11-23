@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.1" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="63" columns="0">
+<tileset version="1.10" tiledversion="1.10.2" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="123" columns="0">
  <editorsettings>
   <export target="arcade_platformer.tsx" format="tsx"/>
  </editorsettings>
@@ -223,5 +223,189 @@
  </tile>
  <tile id="151">
   <image width="66" height="92" source="images/items/alienPink.png"/>
+ </tile>
+ <tile id="152">
+  <image width="128" height="128" source="images/enemies/fly.png"/>
+  <animation>
+   <frame tileid="152" duration="100"/>
+   <frame tileid="153" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="153">
+  <image width="128" height="128" source="images/enemies/fly_dead.png"/>
+ </tile>
+ <tile id="154">
+  <image width="128" height="128" source="images/ground/Sand/sand.png"/>
+ </tile>
+ <tile id="155">
+  <image width="128" height="128" source="images/ground/Sand/sandCenter.png"/>
+ </tile>
+ <tile id="156">
+  <image width="128" height="128" source="images/ground/Sand/sandCenter_rounded.png"/>
+ </tile>
+ <tile id="157">
+  <image width="128" height="128" source="images/ground/Sand/sandCliff_left.png"/>
+ </tile>
+ <tile id="158">
+  <image width="128" height="128" source="images/ground/Sand/sandCliff_right.png"/>
+ </tile>
+ <tile id="159">
+  <image width="128" height="128" source="images/ground/Sand/sandCliffAlt_left.png"/>
+ </tile>
+ <tile id="160">
+  <image width="128" height="128" source="images/ground/Sand/sandCliffAlt_right.png"/>
+ </tile>
+ <tile id="161">
+  <image width="128" height="128" source="images/ground/Sand/sandCorner_leftg.png"/>
+ </tile>
+ <tile id="162">
+  <image width="128" height="128" source="images/ground/Sand/sandCorner_right.png"/>
+ </tile>
+ <tile id="163">
+  <image width="128" height="128" source="images/ground/Sand/sandHalf.png"/>
+ </tile>
+ <tile id="164">
+  <image width="128" height="128" source="images/ground/Sand/sandHalf_left.png"/>
+ </tile>
+ <tile id="165">
+  <image width="128" height="128" source="images/ground/Sand/sandHalf_mid.png"/>
+ </tile>
+ <tile id="166">
+  <image width="128" height="128" source="images/ground/Sand/sandHalf_right.png"/>
+ </tile>
+ <tile id="167">
+  <image width="128" height="128" source="images/ground/Sand/sandHill_left.png"/>
+ </tile>
+ <tile id="168">
+  <image width="128" height="128" source="images/ground/Sand/sandHill_right.png"/>
+ </tile>
+ <tile id="169">
+  <image width="128" height="128" source="images/ground/Sand/sandLeft.png"/>
+ </tile>
+ <tile id="170">
+  <image width="128" height="128" source="images/ground/Sand/sandMid.png"/>
+ </tile>
+ <tile id="171">
+  <image width="128" height="128" source="images/ground/Sand/sandRight.png"/>
+ </tile>
+ <tile id="172">
+  <image width="128" height="128" source="images/ground/Snow/snow.png"/>
+ </tile>
+ <tile id="173">
+  <image width="128" height="128" source="images/ground/Snow/snowCenter.png"/>
+ </tile>
+ <tile id="174">
+  <image width="128" height="128" source="images/ground/Snow/snowCenter_rounded.png"/>
+ </tile>
+ <tile id="175">
+  <image width="128" height="128" source="images/ground/Snow/snowCliff_left.png"/>
+ </tile>
+ <tile id="176">
+  <image width="128" height="128" source="images/ground/Snow/snowCliff_right.png"/>
+ </tile>
+ <tile id="177">
+  <image width="128" height="128" source="images/ground/Snow/snowCliffAlt_left.png"/>
+ </tile>
+ <tile id="178">
+  <image width="128" height="128" source="images/ground/Snow/snowCliffAlt_right.png"/>
+ </tile>
+ <tile id="179">
+  <image width="128" height="128" source="images/ground/Snow/snowCorner_left.png"/>
+ </tile>
+ <tile id="180">
+  <image width="128" height="128" source="images/ground/Snow/snowCorner_right.png"/>
+ </tile>
+ <tile id="181">
+  <image width="128" height="128" source="images/ground/Snow/snowHalf.png"/>
+ </tile>
+ <tile id="182">
+  <image width="128" height="128" source="images/ground/Snow/snowHalf_left.png"/>
+ </tile>
+ <tile id="183">
+  <image width="128" height="128" source="images/ground/Snow/snowHalf_mid.png"/>
+ </tile>
+ <tile id="184">
+  <image width="128" height="128" source="images/ground/Snow/snowHalf_right.png"/>
+ </tile>
+ <tile id="185">
+  <image width="128" height="128" source="images/ground/Snow/snowHill_left.png"/>
+ </tile>
+ <tile id="186">
+  <image width="128" height="128" source="images/ground/Snow/snowHill_right.png"/>
+ </tile>
+ <tile id="187">
+  <image width="128" height="128" source="images/ground/Snow/snowLeft.png"/>
+ </tile>
+ <tile id="188">
+  <image width="128" height="128" source="images/ground/Snow/snowMid.png"/>
+ </tile>
+ <tile id="189">
+  <image width="128" height="128" source="images/ground/Snow/snowRight.png"/>
+ </tile>
+ <tile id="190">
+  <image width="128" height="128" source="images/tiles/snow.png"/>
+ </tile>
+ <tile id="191">
+  <image width="128" height="128" source="images/tiles/cactus.png"/>
+ </tile>
+ <tile id="192">
+  <image width="128" height="128" source="images/tiles/plantPurple.png"/>
+ </tile>
+ <tile id="193">
+  <image width="128" height="128" source="images/tiles/rock.png"/>
+ </tile>
+ <tile id="194">
+  <image width="128" height="128" source="images/ground/Planet/planet.png"/>
+ </tile>
+ <tile id="195">
+  <image width="128" height="128" source="images/ground/Planet/planetCenter.png"/>
+ </tile>
+ <tile id="196">
+  <image width="128" height="128" source="images/ground/Planet/planetCenter_rounded.png"/>
+ </tile>
+ <tile id="197">
+  <image width="128" height="128" source="images/ground/Planet/planetCliff_left.png"/>
+ </tile>
+ <tile id="198">
+  <image width="128" height="128" source="images/ground/Planet/planetCliff_right.png"/>
+ </tile>
+ <tile id="199">
+  <image width="128" height="128" source="images/ground/Planet/planetCliffAlt_left.png"/>
+ </tile>
+ <tile id="200">
+  <image width="128" height="128" source="images/ground/Planet/planetCliffAlt_right.png"/>
+ </tile>
+ <tile id="201">
+  <image width="128" height="128" source="images/ground/Planet/planetCorner_left.png"/>
+ </tile>
+ <tile id="202">
+  <image width="128" height="128" source="images/ground/Planet/planetCorner_right.png"/>
+ </tile>
+ <tile id="203">
+  <image width="128" height="128" source="images/ground/Planet/planetHalf.png"/>
+ </tile>
+ <tile id="204">
+  <image width="128" height="128" source="images/ground/Planet/planetHalf_left.png"/>
+ </tile>
+ <tile id="205">
+  <image width="128" height="128" source="images/ground/Planet/planetHalf_mid.png"/>
+ </tile>
+ <tile id="206">
+  <image width="128" height="128" source="images/ground/Planet/planetHalf_right.png"/>
+ </tile>
+ <tile id="207">
+  <image width="128" height="128" source="images/ground/Planet/planetHill_left.png"/>
+ </tile>
+ <tile id="208">
+  <image width="128" height="128" source="images/ground/Planet/planetHill_right.png"/>
+ </tile>
+ <tile id="209">
+  <image width="128" height="128" source="images/ground/Planet/planetLeft.png"/>
+ </tile>
+ <tile id="210">
+  <image width="128" height="128" source="images/ground/Planet/planetMid.png"/>
+ </tile>
+ <tile id="211">
+  <image width="128" height="128" source="images/ground/Planet/planetRight.png"/>
  </tile>
 </tileset>
