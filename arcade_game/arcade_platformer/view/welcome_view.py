@@ -31,12 +31,19 @@ class WelcomeView(arcade.View):
 
         # Load our title image
         self.title_image = arcade.load_texture(title_image_path)
+        self.player_selector = arcade.load_texture(ASSETS_PATH / "images" / "player_selector.png")
+        self.player1 = arcade.load_texture(ASSETS_PATH / "images" / "vincenzo_head.png")
+        self.player2 = arcade.load_texture(ASSETS_PATH / "images" / "jayadeep_head.png")
+        self.player3 = arcade.load_texture(ASSETS_PATH / "images" / "noah_head.png")
+        self.player4 = arcade.load_texture(ASSETS_PATH / "images" / "joel_head.png")
 
         # Set our display timer
         self.display_timer = 2.0
 
         # Are we showing the instructions?
         self.show_instructions = False
+
+        self.player_sel = 1
 
     def on_update(self, delta_time: float) -> None:
         """Manages the timer to toggle the instructions
@@ -69,24 +76,40 @@ class WelcomeView(arcade.View):
             texture=self.title_image,
         )
 
-        # Should we show our instructions?
-        if self.show_instructions:
-            arcade.draw_text(
-                "Press enter to Start the game",
-                start_x=250,
-                start_y=170,
-                color=arcade.color.SELECTIVE_YELLOW,
-                font_size=30,
-            )
+        arcade.draw_texture_rectangle(center_x=125, center_y=200, width=150, height=210, texture=self.player1)
+        arcade.draw_texture_rectangle(center_x=375, center_y=200, width=150, height=210, texture=self.player2)
+        arcade.draw_texture_rectangle(center_x=625, center_y=200, width=150, height=210, texture=self.player3)
+        arcade.draw_texture_rectangle(center_x=875, center_y=200, width=150, height=210, texture=self.player4)
+
+        arcade.draw_text("PLAYER 1", start_x=40,  start_y=48, color=arcade.color.BLACK, font_size=26)
+        arcade.draw_text("PLAYER 2", start_x=290, start_y=48, color=arcade.color.BLACK, font_size=26)
+        arcade.draw_text("PLAYER 3", start_x=540, start_y=48, color=arcade.color.BLACK, font_size=26)
+        arcade.draw_text("PLAYER 4", start_x=790, start_y=48, color=arcade.color.BLACK, font_size=26)
+        if self.player_sel == 1:
+            arcade.draw_texture_rectangle(center_x=125, center_y=60, width=215, height=70, texture=self.player_selector)
+        if self.player_sel == 2:
+            arcade.draw_texture_rectangle(center_x=375, center_y=60, width=215, height=70, texture=self.player_selector)
+        if self.player_sel == 3:
+            arcade.draw_texture_rectangle(center_x=625, center_y=60, width=215, height=70, texture=self.player_selector)
+        if self.player_sel == 4:
+            arcade.draw_texture_rectangle(center_x=875, center_y=60, width=215, height=70, texture=self.player_selector)
 
     def on_key_press(self, key: int, modifiers: int) -> None:
-        """Start the game when the user presses the enter key
-
+        """
         Arguments:
             key -- Which key was pressed
             modifiers -- What modifiers were active
         """
+
+        if key == arcade.key.RIGHT and self.player_sel < 4:
+            self.player_sel = self.player_sel + 1
+
+        if key == arcade.key.LEFT and self.player_sel > 1:
+            self.player_sel = self.player_sel - 1
+
+        # Start the game when the user presses the enter key
         if key == arcade.key.RETURN:
+            self.player.set_player_num(self.player_sel)
             # Stop intro music
             self.intro_sound.stop(self.sound_player)
             # Launch Game view

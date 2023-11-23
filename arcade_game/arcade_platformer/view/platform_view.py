@@ -1,4 +1,4 @@
-import logging
+from log.config_log import logger
 from time import sleep
 from timeit import default_timer
 from multiprocessing import Process, Queue
@@ -78,8 +78,12 @@ class PlatformerView(arcade.View):
         )
 
         # Init object for the process
-        self.recognize_proc = None
-        self.message_queue = None
+        self.message_queue = Queue()
+        self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
+            "message_queue": self.message_queue,
+            "api_key": os.environ.get('SPEECH_API_KEY'),
+            "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
+        self.recognize_proc.start()
         self.current_command = None
 
         # Play the game start sound animation
@@ -158,14 +162,6 @@ class PlatformerView(arcade.View):
         )
         self.game_player.set_physics_engine(self.physics_engine)
 
-        # Start the process for Speech Recognition
-        self.message_queue = Queue()
-        self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
-            "message_queue": self.message_queue,
-            "api_key": os.environ.get('SPEECH_API_KEY'),
-            "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
-        self.recognize_proc.start()
-
     def update_player_direction(self):
         """
         This process will wait for a command from the speech recognition process
@@ -242,8 +238,6 @@ class PlatformerView(arcade.View):
             - Send it back to the beginning of the level
             - Face the player forward
         """
-        # Stop the speech recognition process
-        self.recognize_proc.terminate()
 
         # Play the death sound
         arcade.play_sound(self.death_sound)
@@ -278,6 +272,7 @@ class PlatformerView(arcade.View):
         elif key in [arcade.key.UP, arcade.key.I]:  # Either up key or I key to go up
             if self.physics_engine.is_on_ladder():
                 self.player.change_y = PLAYER_MOVE_SPEED
+
         elif key in [arcade.key.DOWN, arcade.key.K]:  # Either down key or K key to down
             if self.physics_engine.is_on_ladder():
                 self.player.change_y = -PLAYER_MOVE_SPEED
@@ -328,17 +323,33 @@ class PlatformerView(arcade.View):
 
             # Process the command
             if self.current_command == "up":
+                logger.info("[PLATFORM]: Moving up")
                 self.game_player.move_up()
             elif self.current_command == "down":
+                logger.info("[PLATFORM]: Moving down")
                 self.game_player.move_down()
             elif self.current_command == "left":
+                logger.info("[PLATFORM]: Moving left")
                 self.game_player.move_left()
             elif self.current_command == "right":
+                logger.info("[PLATFORM]: Moving right")
                 self.game_player.move_right()
             elif self.current_command == "jump":
+                logger.info("[PLATFORM]: Jumping")
                 self.game_player.jump()
             elif self.current_command == "stop":
                 self.game_player.stop()
+                logger.info("[PLATFORM]: Stopping")
+
+        if self.physics_engine.is_on_ladder():
+            for ladder in self.ladders:
+                if arcade.check_for_collision(self.player, ladder):
+                    current_ladder = ladder
+                    break
+            if (current_ladder.top - self.player.bottom ) <= 30:
+                if self.player.change_y > 0:
+                    self.player.change_y = 0
+                logger.info(f"{self.player.bottom}, {current_ladder.top}, {self.player.change_y}")
 
         # Update the player animation
         self.player.update_animation(delta_time)
@@ -381,10 +392,9 @@ class PlatformerView(arcade.View):
         )
 
         if goals_hit:
-            # Stop the speech recognition process
-            self.recognize_proc.terminate()
-
             if self.level == 4:  # Game is finished : Victory !
+                # # Stop the speech recognition process
+                # self.recognize_proc.terminate()
                 self.handle_victory()
             else:
                 # Play the level victory sound
