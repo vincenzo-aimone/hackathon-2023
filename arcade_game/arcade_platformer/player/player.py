@@ -2,6 +2,7 @@ import arcade
 
 from arcade_game.arcade_platformer.config.config import PLAYER_START_X, PLAYER_START_Y, ASSETS_PATH, \
     PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED
+from log.config_log import logger
 
 
 class Player:
@@ -117,6 +118,7 @@ class Player:
             arcade.play_sound(self.jump_sound)
 
     def stop(self):
+        logger.info ("STOP INVOKED")
         self.player.change_x = 0
         self.player.change_y = 0
         
@@ -132,4 +134,21 @@ class Player:
         
     def is_slowed_down(self):
         return self.speed_multiplier != 1
-        
+
+    def step(self):
+        def step_stop(_):
+            self.stop()
+            arcade.unschedule(step_stop)
+        if self.player.state == arcade.FACE_RIGHT:
+            self.move_right()
+            arcade.schedule(step_stop, 0.5)
+        else:
+            self.move_left()
+            arcade.schedule(step_stop, 0.5)
+
+    def turn(self):
+        self.stop()
+        if self.player.state == arcade.FACE_RIGHT:
+            self.player.state = arcade.FACE_LEFT
+        else:
+            self.player.state = arcade.FACE_RIGHT

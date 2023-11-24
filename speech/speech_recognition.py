@@ -48,6 +48,12 @@ def speech_to_text_continuous(message_queue: Queue, api_key: str, speech_region:
         if "stop" in event.result.text.lower():
             message_queue.put("stop")
 
+        if "step" in event.result.text.lower():
+            message_queue.put("step")
+
+        if "turn" in event.result.text.lower() or "done" in event.result.text.lower():
+            message_queue.put("turn")
+
     # Init engine
     speech_config = speechsdk.SpeechConfig(subscription=api_key, region=speech_region)
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)

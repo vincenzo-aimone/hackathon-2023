@@ -419,6 +419,12 @@ class PlatformerView(arcade.View):
             elif self.current_command == "stop":
                 self.game_player.stop()
                 logger.info("[PLATFORM]: Stopping")
+            elif self.current_command == "step":
+                self.game_player.step()
+                logger.info("[PLATFORM]: Stepping")
+            elif self.current_command == "turn":
+                logger.info("[PLATFORM]: Turning")
+                self.game_player.turn()
 
         if self.physics_engine.is_on_ladder():
             for ladder in self.ladders:
@@ -469,8 +475,8 @@ class PlatformerView(arcade.View):
             enemy_hit = arcade.check_for_collision_with_list(
                 sprite=self.player, sprite_list=self.enemies
             )
-
             if enemy_hit:
+                logger.info(f"ENEMY_HIT: {enemy_hit}")
                 # if the player collide with the enemy from the top, the enemy dies
                 if self.player.center_y > enemy_hit[0].center_y + 150:
                     enemy_name = enemy_hit[0].properties["name"]
