@@ -2,13 +2,15 @@ from log.config_log import logger
 from time import sleep
 from timeit import default_timer
 from multiprocessing import Process, Queue
+from uuid import uuid4
 import os
 import arcade
 
 from speech.speech_recognition import speech_to_text_continuous
 from arcade_game.arcade_platformer.config.config import SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
     MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
-    TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED
+    TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
+    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR
 from arcade_game.arcade_platformer.player.player import Player
 from . import game_over_view, winner_view
 
@@ -23,62 +25,65 @@ class PlatformerView(arcade.View):
 
         self.game_player = player
 
-        # These lists will hold different sets of sprites
+        self._init_static_elements()
+        self._init_actors()
+        self._init_dynamic_elements()
+        self._init_map_variables()
+        self._init_minimap_variables()
+        self._init_sounds()
+        self._init_speech_recognizer()
+
+        # Avoids leaving the mouse pointer in the middle
+        self.window.set_mouse_visible(False)
+
+        # Play the game start sound animation
+        # There is a lag with the 1st sound played so to avoid having a lag during the game
+        # when we take the 1st coin we play a sound for the start of the game
+        arcade.play_sound(self.ready_sound)
+        sleep(1)
+        arcade.play_sound(self.go_sound)
+
+    def _init_static_elements(self):
         self.coins = None
         self.background = None
         self.walls = None
         self.ladders = None
         self.goals = None
         self.traps = None
-        self.enemies = arcade.SpriteList() 
-        self.enemies_dead = arcade.SpriteList()        
 
-        # Avoids leaving the mouse pointer in the middle
-        self.window.set_mouse_visible(False)
-
-        # One sprite for the player, no more is needed
+    def _init_actors(self):
+        self.enemies = arcade.SpriteList()
+        self.enemies_dead = arcade.SpriteList()
         self.player = self.game_player.player
 
-        # We need a physics engine as well
+    def _init_dynamic_elements(self):
         self.physics_engine = None
-
-        # Someplace to keep score
         self.score = 0
-
-        # Life count init
         self.life_count = TOTAL_LIFE_COUNT
-
-        # Start the timer
+        self.level = 1
         self.time_start = default_timer()  # integer, expressing the time in seconds
 
-        # Which level are we on?
-        self.level = 1
-
-        # Instantiate some variables that we will initialise in the setup function
+    def _init_map_variables(self):
         self.map_width = 0
         self.view_left = 0
         self.view_bottom = 0
 
-        # Load up our sound effects here
-        self.ready_sound = arcade.load_sound(
-            str(ASSETS_PATH / "sounds" / "ready.wav")
-        )
-        self.go_sound = arcade.load_sound(
-            str(ASSETS_PATH / "sounds" / "go.wav")
-        )
-        self.coin_sound = arcade.load_sound(
-            str(ASSETS_PATH / "sounds" / "coin.wav")
-        )
-        self.jump_sound = arcade.load_sound(
-            str(ASSETS_PATH / "sounds" / "jump.wav")
-        )
-        self.level_victory_sound = arcade.load_sound(
-            str(ASSETS_PATH / "sounds" / "level_victory.wav")
-        )
-        self.death_sound = arcade.load_sound(
-            str(ASSETS_PATH / "sounds" / "death.wav")
-        )
+    def _init_minimap_variables(self):
+        # List of all our minimaps (there's just one)
+        self.minimap_sprite_list = None
+        # Texture and associated sprite to render our minimap to
+        self.minimap_texture = None
+        self.minimap_sprite = None
 
+    def _init_sounds(self):
+        self.ready_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "ready.wav"))
+        self.go_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "go.wav"))
+        self.coin_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "coin.wav"))
+        self.jump_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "jump.wav"))
+        self.level_victory_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "level_victory.wav"))
+        self.death_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "death.wav"))
+
+    def _init_speech_recognizer(self):
         # Init object for the process
         self.message_queue = Queue()
         self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
@@ -88,12 +93,38 @@ class PlatformerView(arcade.View):
         self.recognize_proc.start()
         self.current_command = None
 
-        # Play the game start sound animation
-        # There is a lag with the 1st sound played so to avoid having a lag during the game
-        # when we take the 1st coin we play a sound for the start of the game
-        arcade.play_sound(self.ready_sound)
-        sleep(1)
-        arcade.play_sound(self.go_sound)
+    def _draw_static_elements(self):
+        self.walls.draw()
+        self.coins.draw()
+        self.goals.draw()
+        # Not all maps have ladders
+        if self.ladders is not None:
+            self.ladders.draw()
+
+        # Not all maps have traps
+        if self.traps is not None:
+            self.traps.draw()
+
+    def _draw_actors(self):
+        self.player.draw()
+        if self.enemies is not None:
+            self.enemies.draw()
+        if self.enemies_dead is not None:
+            self.enemies_dead.draw()
+
+    def _draw_dynamic_elements(self):
+        self.draw_score()
+        self.draw_life_count()
+        self.draw_timer()
+
+    def update_minimap(self):
+        self.minimap_sprite.center_x = self.view_left + (MINIMAP_WIDTH[self.level] / 2)
+        self.minimap_sprite.center_y = self.view_bottom + SCREEN_HEIGHT - (MINIMAP_HEIGHT[self.level] / 2)
+        proj = 0, MAP_WIDTH[self.level], 0, MAP_HEIGHT[self.level]
+        with self.minimap_sprite_list.atlas.render_into(self.minimap_texture, projection=proj) as fbo:
+            fbo.clear(MINIMAP_BACKGROUND_COLOR)
+            self._draw_static_elements()
+            self._draw_actors()
 
     def setup(self):
         """Sets up the game for the current level. This runs every time we load a new level"""
@@ -110,6 +141,15 @@ class PlatformerView(arcade.View):
             "coins": {"use_spatial_hash": True},
         }
 
+        size = (MINIMAP_WIDTH[self.level], MINIMAP_HEIGHT[self.level])
+        self.minimap_texture = arcade.Texture.create_empty(str(uuid4()), size)
+        self.minimap_sprite = arcade.Sprite(center_x=MINIMAP_WIDTH[self.level] / 2,
+                                            center_y=self.window.height - MINIMAP_HEIGHT[self.level] / 2,
+                                            texture=self.minimap_texture)
+
+        self.minimap_sprite_list = arcade.SpriteList()
+        self.minimap_sprite_list.append(self.minimap_sprite)
+
         # Load the current map
         game_map = arcade.load_tilemap(
             map_path, layer_options=layer_options, scaling=MAP_SCALING
@@ -120,6 +160,7 @@ class PlatformerView(arcade.View):
         self.goals = game_map.sprite_lists["goal"]
         self.walls = game_map.sprite_lists["ground"]
         self.coins = game_map.sprite_lists["coins"]
+
 
         # Only load ladders in maps with some ladders
         if "ladders" in game_map.sprite_lists:
@@ -384,10 +425,9 @@ class PlatformerView(arcade.View):
                 if arcade.check_for_collision(self.player, ladder):
                     current_ladder = ladder
                     break
-            if (current_ladder.top - self.player.bottom ) <= 30:
+            if (current_ladder.top - self.player.bottom ) <= 25:
                 if self.player.change_y > 0:
                     self.player.change_y = 0
-                logger.info(f"{self.player.bottom}, {current_ladder.top}, {self.player.change_y}")
 
         # Update the player animation
         self.player.update_animation(delta_time)
@@ -514,25 +554,15 @@ class PlatformerView(arcade.View):
 
         # Draw all the sprites
         self.background.draw()
-        self.walls.draw()
-        self.coins.draw()
-        self.goals.draw()
-        self.enemies.draw()
-        self.enemies_dead.draw()
+        self._draw_static_elements()
+        self._draw_actors()
+        self._draw_dynamic_elements()
 
-        # Not all maps have ladders
-        if self.ladders is not None:
-            self.ladders.draw()
+        # Update the minimap
+        self.update_minimap()
 
-        # Not all maps have traps
-        if self.traps is not None:
-            self.traps.draw()
-
-        # Draw the dynamic elements : play, score, life count
-        self.player.draw()
-        self.draw_score()
-        self.draw_life_count()
-        self.draw_timer()
+        # Draw the minimap
+        self.minimap_sprite_list.draw()
 
     def draw_score(self):
         """

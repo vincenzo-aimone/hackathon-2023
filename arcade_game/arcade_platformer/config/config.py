@@ -1,3 +1,4 @@
+import arcade
 import pathlib
 
 """ This is the main constant for the game """
@@ -33,3 +34,11 @@ TOTAL_LIFE_COUNT = 5
 
 # Assets path
 ASSETS_PATH = pathlib.Path(__file__).resolve().parent.parent.parent / "assets"
+
+
+# Minimap config - Background color must include an alpha component
+MINIMAP_BACKGROUND_COLOR = arcade.get_four_byte_color(arcade.color.ALMOND)
+MAP_WIDTH = {1: 3200, 2: 4800, 3: 6400, 4: 6400}
+MAP_HEIGHT = {1: 1024, 2: 1280, 3: 2560, 4: 2560}
+MINIMAP_WIDTH = {1: 192, 2: 288, 3: 384, 4: 384}
+MINIMAP_HEIGHT = {1: 64, 2: 80, 3: 160, 4: 160}
