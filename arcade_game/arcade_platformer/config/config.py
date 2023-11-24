@@ -42,3 +42,15 @@ MAP_WIDTH = {1: 3200, 2: 4800, 3: 6400, 4: 6400}
 MAP_HEIGHT = {1: 1024, 2: 1280, 3: 2560, 4: 2560}
 MINIMAP_WIDTH = {1: 192, 2: 288, 3: 384, 4: 384}
 MINIMAP_HEIGHT = {1: 64, 2: 80, 3: 160, 4: 160}
+
+
+# Speech bubble texts
+WELCOME_TEXTS = [
+    "Showtime, baby!",
+    "Howdy folks!"
+]
+LADDER_TEXTS = [
+    "This is exhausting! I need a vacation...",
+    "Damn! I should go to the gym more often",
+    "Aaargh....my back",
+]

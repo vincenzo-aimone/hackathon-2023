@@ -4,13 +4,14 @@ from timeit import default_timer
 from multiprocessing import Process, Queue
 from uuid import uuid4
 import os
+import random
 import arcade
 
 from speech.speech_recognition import speech_to_text_continuous
 from arcade_game.arcade_platformer.config.config import SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
     MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
     TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
-    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR
+    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS
 from arcade_game.arcade_platformer.player.player import Player
 from . import game_over_view, winner_view
 
@@ -63,6 +64,15 @@ class PlatformerView(arcade.View):
         self.level = 1
         self.time_start = default_timer()  # integer, expressing the time in seconds
         self.effects = arcade.SpriteList()
+        self.is_speaking = False
+        self._speak_random(WELCOME_TEXTS, 3)
+
+    def _speak_random(self, text_list, duration=3):
+        """
+        Takes a list of texts to and our character speaks (in a bubble)
+        for the duration given.
+        """
+        self._speak(random.choice(text_list), duration)
 
     def _init_map_variables(self):
         self.map_width = 0
@@ -113,13 +123,41 @@ class PlatformerView(arcade.View):
         if self.enemies_dead is not None:
             self.enemies_dead.draw()
 
+    def _draw_effects(self):
+        for effect in self.effects:
+            # offset_x and offset_y used to anchor it to the character
+            # sprite
+            effect.center_x = self.player.center_x + effect.offset_x
+            effect.center_y = self.player.center_y + effect.offset_y
+
+            # If it is a speech bubble, draw the effect and then the
+            # text
+            if hasattr(effect, "text"):
+                effect_text = arcade.Text(
+                    text=effect.text,
+                    start_x=effect.left + 30,
+                    start_y=effect.top - 80,
+                    color=arcade.color.BLACK,
+                    font_size=12,
+                    width=effect.width - 60,
+                    align="center",
+                    font_name="Kenney Future",
+                    multiline=True,
+                )
+                effect.draw()
+                effect_text.draw()
+            else:
+                effect.draw()
+
     def _draw_dynamic_elements(self):
-        self.effects.draw()
+        if len(self.effects) > 0:
+            self._draw_effects()
+            # self.effects.draw()
         self.draw_score()
         self.draw_life_count()
         self.draw_timer()
 
-    def update_minimap(self):
+    def _update_minimap(self):
         self.minimap_sprite.center_x = self.view_left + (MINIMAP_WIDTH[self.level] / 2)
         self.minimap_sprite.center_y = self.view_bottom + SCREEN_HEIGHT - (MINIMAP_HEIGHT[self.level] / 2)
         proj = 0, MAP_WIDTH[self.level], 0, MAP_HEIGHT[self.level]
@@ -127,6 +165,26 @@ class PlatformerView(arcade.View):
             fbo.clear(MINIMAP_BACKGROUND_COLOR)
             self._draw_static_elements()
             self._draw_actors()
+
+    def _speak(self, text, duration):
+        """Speaks the text (in a bubble) given for the duration"""
+        if self.is_speaking:
+            return
+        speech_sprite = arcade.Sprite(
+            filename=str(ASSETS_PATH / "images" / "speech_bubbles" / "two.png"),
+            scale=0.5,
+        )
+        speech_sprite.offset_x = 200
+        speech_sprite.offset_y = 100
+        speech_sprite.text = text
+        self.effects.append(speech_sprite)
+        self.is_speaking = True
+
+        def _unset_speech_sprite(value):
+            self.effects.remove(speech_sprite)
+            self.is_speaking = False
+            arcade.unschedule(_unset_speech_sprite)
+        arcade.schedule(_unset_speech_sprite, duration)
 
     def setup(self):
         """Sets up the game for the current level. This runs every time we load a new level"""
@@ -440,6 +498,7 @@ class PlatformerView(arcade.View):
             if (current_ladder.top - self.player.bottom ) <= 25:
                 if self.player.change_y > 0:
                     self.player.change_y = 0
+                    self._speak_random(LADDER_TEXTS, 1.5)
 
         # Update the player animation
         self.player.update_animation(delta_time)
@@ -506,15 +565,14 @@ class PlatformerView(arcade.View):
                         # if the player is slowed down, dont schedule another speed multiplier reset
                         if not self.game_player.is_slowed_down():                    
                             self.game_player.slow_down(slow_value)
-                            
                             # render the slow sprite
                             slow_sprite = arcade.Sprite(
                                 filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
                                 scale=MAP_SCALING,
                             )
 
-                            slow_sprite.center_x = self.player.center_x + 75
-                            slow_sprite.center_y = self.player.center_y + 75
+                            slow_sprite.offset_x = 75
+                            slow_sprite.offset_y = 75
                             self.effects.append(slow_sprite)
 
                             def reset_speed_multiplier(value):
@@ -586,7 +644,7 @@ class PlatformerView(arcade.View):
         self._draw_dynamic_elements()
 
         # Update the minimap
-        self.update_minimap()
+        self._update_minimap()
 
         # Draw the minimap
         self.minimap_sprite_list.draw()
@@ -637,7 +695,7 @@ class PlatformerView(arcade.View):
             life_image = arcade.load_texture(image_path)
             arcade.draw_texture_rectangle(
                 x + self.view_left,
-                620 + self.view_bottom,
+                50 + self.view_bottom,
                 70, 70, life_image)
             return x - 70
 
