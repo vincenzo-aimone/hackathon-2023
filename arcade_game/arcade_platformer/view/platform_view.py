@@ -631,19 +631,21 @@ class PlatformerView(arcade.View):
         life_half_path = ASSETS_PATH / "images" / "HUD" / "hudHeart_half.png"
         life_empty_path = ASSETS_PATH / "images" / "HUD" / "hudHeart_empty.png"
 
-        # Display a full heart by default
-        life_image_path = life_full_path
-        if self.life_count == 2:  # display the half-full heart
-            life_image_path = life_half_path
-        elif self.life_count == 1:  # display the empty heart
-            life_image_path = life_empty_path
+        next_x = 960
 
-        # Load our score image
-        life_image = arcade.load_texture(life_image_path)
-        arcade.draw_texture_rectangle(
-            960 + self.view_left,
-            620 + self.view_bottom,
-            70, 70, life_image)
+        def draw_hearts(image_path, x):
+            life_image = arcade.load_texture(image_path)
+            arcade.draw_texture_rectangle(
+                x + self.view_left,
+                620 + self.view_bottom,
+                70, 70, life_image)
+            return x - 70
+
+        for ix in range(TOTAL_LIFE_COUNT - self.life_count):
+            next_x = draw_hearts(life_empty_path, next_x)
+
+        for ix in range(self.life_count):
+            next_x = draw_hearts(life_full_path, next_x)
 
     def draw_timer(self):
         """
