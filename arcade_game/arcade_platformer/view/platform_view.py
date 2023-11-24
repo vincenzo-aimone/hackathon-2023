@@ -44,7 +44,7 @@ class PlatformerView(arcade.View):
         arcade.play_sound(self.go_sound)
 
     def _init_static_elements(self):
-        self.coins = None
+        self.coins = arcade.SpriteList()
         self.background = None
         self.walls = None
         self.ladders = None
@@ -161,8 +161,9 @@ class PlatformerView(arcade.View):
         self.background = game_map.sprite_lists["background"]
         self.goals = game_map.sprite_lists["goal"]
         self.walls = game_map.sprite_lists["ground"]
-        self.coins = game_map.sprite_lists["coins"]
 
+        if "coins" in game_map.sprite_lists:
+            self.coins = game_map.sprite_lists["coins"]
 
         # Only load ladders in maps with some ladders
         if "ladders" in game_map.sprite_lists:

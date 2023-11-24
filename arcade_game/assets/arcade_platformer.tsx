@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="128" columns="0">
+<tileset version="1.10" tiledversion="1.10.2" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="133" columns="0">
  <editorsettings>
   <export target="arcade_platformer.tsx" format="tsx"/>
  </editorsettings>
@@ -131,6 +131,10 @@
  </tile>
  <tile id="62">
   <image width="128" height="128" source="images/items/flagGreen2.png"/>
+  <animation>
+   <frame tileid="61" duration="200"/>
+   <frame tileid="62" duration="200"/>
+  </animation>
  </tile>
  <tile id="69">
   <image width="128" height="128" source="images/items/gemBlue.png"/>
@@ -430,5 +434,28 @@
  </tile>
  <tile id="216">
   <image width="128" height="128" source="images/enemies/ladybug_move.png"/>
+ </tile>
+ <tile id="217">
+  <image width="123" height="123" source="../../../../../Downloads/IE.png"/>
+ </tile>
+ <tile id="218">
+  <image width="70" height="70" source="images/items/clock.png"/>
+ </tile>
+ <tile id="219">
+  <image width="128" height="128" source="images/items/flagGreen1.png"/>
+  <animation>
+   <frame tileid="61" duration="500"/>
+   <frame tileid="62" duration="500"/>
+  </animation>
+ </tile>
+ <tile id="220">
+  <image width="128" height="128" source="images/enemies/snail.png"/>
+  <animation>
+   <frame tileid="221" duration="350"/>
+   <frame tileid="220" duration="900"/>
+  </animation>
+ </tile>
+ <tile id="221">
+  <image width="128" height="128" source="images/enemies/snail_move.png"/>
  </tile>
 </tileset>
