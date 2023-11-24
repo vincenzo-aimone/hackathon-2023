@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="123" columns="0">
+<tileset version="1.10" tiledversion="1.10.2" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="128" columns="0">
  <editorsettings>
   <export target="arcade_platformer.tsx" format="tsx"/>
  </editorsettings>
@@ -407,5 +407,28 @@
  </tile>
  <tile id="211">
   <image width="128" height="128" source="images/ground/Planet/planetRight.png"/>
+ </tile>
+ <tile id="212">
+  <image width="128" height="128" source="images/enemies/barnacle.png"/>
+  <animation>
+   <frame tileid="212" duration="100"/>
+   <frame tileid="213" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="213">
+  <image width="128" height="128" source="images/enemies/barnacle_attack.png"/>
+ </tile>
+ <tile id="214">
+  <image width="128" height="128" source="images/enemies/barnacle_dead.png"/>
+ </tile>
+ <tile id="215">
+  <image width="128" height="128" source="images/enemies/ladybug.png"/>
+  <animation>
+   <frame tileid="216" duration="100"/>
+   <frame tileid="215" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="216">
+  <image width="128" height="128" source="images/enemies/ladybug_move.png"/>
  </tile>
 </tileset>

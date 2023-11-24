@@ -175,6 +175,15 @@ class PlatformerView(arcade.View):
         # Only load enemies in maps with some enemies
         if "enemies" in game_map.sprite_lists:
             self.enemies = game_map.sprite_lists["enemies"]
+            # add physycs engine to the enemy
+            for enemy in self.enemies:
+                enemy.physics_engine = arcade.PhysicsEnginePlatformer(
+                    player_sprite=enemy,
+                    platforms=self.walls,
+                    gravity_constant=GRAVITY,
+                    ladders=self.ladders,
+                )
+
 
         # Set the background color
         background_color = arcade.color.FRESH_AIR
@@ -364,21 +373,6 @@ class PlatformerView(arcade.View):
         Arguments:
             delta_time {float} -- How much time since the last call
         """
-
-        # Handle enemies animation
-        if self.enemies is not None:
-            for enemy in self.enemies:
-                enemy.update_animation(delta_time)
-
-        # Handle enemies movement
-        if self.enemies is not None:
-            for enemy in self.enemies:
-                # if there is speed property, the enemy moves horizontally (left or right)
-                if "speed" in enemy.properties:
-                    enemy.change_x = int(enemy.properties["speed"])
-                    # move the enemy
-                    enemy.center_x += enemy.change_x * delta_time
-                
         # if there are some effects, draw them
         if self.effects is not None:
             for effect in self.effects:
@@ -523,6 +517,27 @@ class PlatformerView(arcade.View):
                                 arcade.unschedule(reset_speed_multiplier)
                             arcade.schedule(reset_speed_multiplier, 5)
 
+                        # if there is speed property, the enemy moves horizontally (left or right)
+           
+            # Handle enemies animation
+            for enemy in self.enemies:
+                # if the enemy has a speed property, we update the 
+                if "speed" in enemy.properties:
+                    enemy.change_x = float(enemy.properties["speed"])
+
+                    
+                    # if the enemy has a jump_delay property, the enemy jumps
+                    if "jump_force" in enemy.properties:
+                        # if the enemy can jump
+
+                        if enemy.physics_engine.can_jump():    
+                            enemy.physics_engine.jump(enemy.properties["jump_force"])
+
+                enemy.physics_engine.update()
+                    
+                enemy.update_animation(delta_time)
+
+
         # Now check if we are at the ending goal
         goals_hit = arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.goals
@@ -541,6 +556,13 @@ class PlatformerView(arcade.View):
 
                 # Set up the next level and call setup again to load the new map
                 self.level += 1
+
+                # remove the dead enemies from the sprite list
+                self.enemies_dead = arcade.SpriteList()
+
+                # remove the effects from the sprite list
+                self.effects = arcade.SpriteList()
+
                 self.setup()
         else:
             # Set the viewport, scrolling if necessary
