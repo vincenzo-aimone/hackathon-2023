@@ -62,6 +62,7 @@ class PlatformerView(arcade.View):
         self.life_count = TOTAL_LIFE_COUNT
         self.level = 1
         self.time_start = default_timer()  # integer, expressing the time in seconds
+        self.effects = arcade.SpriteList()
 
     def _init_map_variables(self):
         self.map_width = 0
@@ -113,6 +114,7 @@ class PlatformerView(arcade.View):
             self.enemies_dead.draw()
 
     def _draw_dynamic_elements(self):
+        self.effects.draw()
         self.draw_score()
         self.draw_life_count()
         self.draw_timer()
@@ -377,7 +379,11 @@ class PlatformerView(arcade.View):
                     # move the enemy
                     enemy.center_x += enemy.change_x * delta_time
                 
-
+        # if there are some effects, draw them
+        if self.effects is not None:
+            for effect in self.effects:
+                # show effect on the right of the player
+                effect.center_x = self.player.center_x + 50
                 
         # Handle ground animation
         for wall in self.walls:
@@ -476,29 +482,44 @@ class PlatformerView(arcade.View):
                 sprite=self.player, sprite_list=self.enemies
             )
             if enemy_hit:
-                logger.info(f"ENEMY_HIT: {enemy_hit}")
                 # if the player collide with the enemy from the top, the enemy dies
-                if self.player.center_y > enemy_hit[0].center_y + 150:
-                    enemy_name = enemy_hit[0].properties["name"]
+                if self.player.center_y > enemy_hit[0].center_y + 80:
                     enemy_hit[0].remove_from_sprite_lists()
-                    dead_sprite = arcade.Sprite(
-                        filename=str(ASSETS_PATH / "images" / "enemies" / f"{enemy_name}_dead.png"),
-                        scale=MAP_SCALING,
-                    )
-                    dead_sprite.center_x = enemy_hit[0].center_x
-                    dead_sprite.center_y = enemy_hit[0].center_y
-                    self.enemies_dead.append(dead_sprite)
+                    # check if the enemy has a name property
+                    if "name" in enemy_hit[0].properties:
+                        enemy_name = enemy_hit[0].properties["name"]
+                        dead_sprite = arcade.Sprite(
+                            filename=str(ASSETS_PATH / "images" / "enemies" / f"{enemy_name}_dead.png"),
+                            scale=MAP_SCALING,
+                        )
+                        dead_sprite.center_x = enemy_hit[0].center_x
+                        dead_sprite.center_y = enemy_hit[0].center_y
+                        self.enemies_dead.append(dead_sprite)
 
-                    # play the enemy death sound
-                    arcade.play_sound(self.death_sound)
+                        # play the enemy death sound
+                        arcade.play_sound(self.death_sound)
                 else:
                     # if enemy has slow property, update the player speed multiplier
                     if "slow" in enemy_hit[0].properties:
+                        slow_value = float(enemy_hit[0].properties["slow"])
+
                         # if the player is slowed down, dont schedule another speed multiplier reset
                         if not self.game_player.is_slowed_down():                    
-                            self.game_player.slow_down(float(enemy_hit[0].properties["slow"]))
+                            self.game_player.slow_down(slow_value)
+                            
+                            # render the slow sprite
+                            slow_sprite = arcade.Sprite(
+                                filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
+                                scale=MAP_SCALING,
+                            )
+
+                            slow_sprite.center_x = self.player.center_x + 75
+                            slow_sprite.center_y = self.player.center_y + 75
+                            self.effects.append(slow_sprite)
+
                             def reset_speed_multiplier(value):
                                 self.game_player.reset_speed()
+                                self.effects.remove(slow_sprite)
                                 arcade.unschedule(reset_speed_multiplier)
                             arcade.schedule(reset_speed_multiplier, 5)
 
