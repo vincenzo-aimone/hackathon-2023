@@ -1,5 +1,5 @@
 from log.config_log import logger
-from time import sleep
+from time import sleep, time
 from timeit import default_timer
 from multiprocessing import Process, Queue
 from uuid import uuid4
@@ -586,10 +586,15 @@ class PlatformerView(arcade.View):
                     
                     # if the enemy has a jump_delay property, the enemy jumps
                     if "jump_force" in enemy.properties:
-                        # if the enemy can jump
-
-                        if enemy.physics_engine.can_jump():    
-                            enemy.physics_engine.jump(enemy.properties["jump_force"])
+                        if "last_jumped" in enemy.properties:
+                            if time() > (enemy.properties["last_jumped"] + enemy.properties["jump_interval"]):
+                                if enemy.physics_engine.can_jump():
+                                    enemy.physics_engine.jump(enemy.properties["jump_force"])
+                                    enemy.properties["last_jumped"] = time()
+                        else:
+                            if enemy.physics_engine.can_jump():
+                                enemy.physics_engine.jump(enemy.properties["jump_force"])
+                                enemy.properties["last_jumped"] = time()
 
                 enemy.physics_engine.update()
                     
