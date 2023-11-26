@@ -90,6 +90,7 @@ class Player:
         player.center_x = PLAYER_START_X
         player.center_y = PLAYER_START_Y
         player.state = arcade.FACE_RIGHT
+        player.speed = PLAYER_MOVE_SPEED
 
         # Set the initial texture
         player.texture = player.stand_right_textures[0]
@@ -97,19 +98,19 @@ class Player:
         return player
 
     def move_left(self):
-        self.player.change_x = -PLAYER_MOVE_SPEED * self.speed_multiplier
+        self.player.change_x = -self.player.speed * self.speed_multiplier
 
     def move_right(self):
-        self.player.change_x = PLAYER_MOVE_SPEED * self.speed_multiplier
+        self.player.change_x = self.player.speed * self.speed_multiplier
 
     def move_up(self):
         # Check if player can climb up or down
         if self.physics_engine.is_on_ladder():
-            self.player.change_y = PLAYER_MOVE_SPEED * self.speed_multiplier
+            self.player.change_y = self.player.speed * self.speed_multiplier
 
     def move_down(self):
         if self.physics_engine.is_on_ladder():
-            self.player.change_y = -PLAYER_MOVE_SPEED * self.speed_multiplier
+            self.player.change_y = -self.player.speed * self.speed_multiplier
 
     def jump(self):
         if self.physics_engine.can_jump():

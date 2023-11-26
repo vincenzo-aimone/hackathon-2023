@@ -30,29 +30,45 @@ def speech_to_text_continuous(message_queue: Queue, api_key: str, speech_region:
     def recognized_speech(event: SpeechRecognitionEventArgs):
         logger.info(f"Recognized: {event.result.text}")
 
-        if "up" in event.result.text.lower():
-            message_queue.put("up")
+        commands = ["up", "down", "left", "right", "jump", "stop", "step",
+                    "turn", "done", "barry allen", "super lotto",]
+        command_map = {
+            "done": "turn",
+        }
 
-        if "down" in event.result.text.lower():
-            message_queue.put("down")
+        for command in commands:
+            if command in event.result.text.lower():
+                message_queue.put(command_map.get(command, command))
 
-        if "left" in event.result.text.lower():
-            message_queue.put("left")
+        # if "up" in event.result.text.lower():
+        #     message_queue.put("up")
 
-        if "right" in event.result.text.lower():
-            message_queue.put("right")
+        # if "down" in event.result.text.lower():
+        #     message_queue.put("down")
 
-        if "jump" in event.result.text.lower():
-            message_queue.put("jump")
+        # if "left" in event.result.text.lower():
+        #     message_queue.put("left")
 
-        if "stop" in event.result.text.lower():
-            message_queue.put("stop")
+        # if "right" in event.result.text.lower():
+        #     message_queue.put("right")
 
-        if "step" in event.result.text.lower():
-            message_queue.put("step")
+        # if "jump" in event.result.text.lower():
+        #     message_queue.put("jump")
 
-        if "turn" in event.result.text.lower() or "done" in event.result.text.lower():
-            message_queue.put("turn")
+        # if "stop" in event.result.text.lower():
+        #     message_queue.put("stop")
+
+        # if "step" in event.result.text.lower():
+        #     message_queue.put("step")
+
+        # if "turn" in event.result.text.lower() or "done" in event.result.text.lower():
+        #     message_queue.put("turn")
+
+        # if "barry allen" in event.result.text.lower():
+        #     message_queue.put("barry allen")
+
+        # if "super lotto" in event.result.text.lower():
+        #     message_queue.put("super lotto")
 
     # Init engine
     speech_config = speechsdk.SpeechConfig(subscription=api_key, region=speech_region)

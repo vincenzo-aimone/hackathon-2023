@@ -17,7 +17,7 @@ MAP_SCALING = 1.0
 GRAVITY = 1.0
 PLAYER_START_X = 65
 PLAYER_START_Y = 256
-PLAYER_MOVE_SPEED = 6
+PLAYER_MOVE_SPEED = 20
 PLAYER_JUMP_SPEED = 25
 
 # Viewport (horizontal/vertical scroll) margins
@@ -47,10 +47,51 @@ MINIMAP_HEIGHT = {1: 64, 2: 80, 3: 160, 4: 160}
 # Speech bubble texts
 WELCOME_TEXTS = [
     "Showtime, baby!",
-    "Howdy folks!"
+    "Howdy folks!",
 ]
 LADDER_TEXTS = [
     "This is exhausting! I need a vacation...",
     "Damn! I should go to the gym more often",
     "Aaargh....my back",
+    "If this is a dream, I hate you my unconscious",
 ]
+IDLE_TEXTS = [
+    "What kinda planet has no pubs ANYWHERE...",
+    "Kowabunga, let's get some pizza!",
+    "I mean, what kinda name is Scrummy Bears anyway...",
+    "If you wanna be listened to in life, you gotta speak up",
+    "Stop mumbling, alien up!",
+    "Argh, speak louder, and speak earlier!"
+]
+DYING_TEXTS = [
+    "Ah, well done!",
+    "Salvation... at last",
+    "Well.. thanks for nothing",
+]
+ENEMY_KILLED_TEXTS = [
+    "You don't mess with the Roz..an",
+    "Was that meant to be challenging or something?",
+    "This is getting boring now.."
+]
+
+ENEMY_STATIC_INFO = {
+    "ladybug": {
+        "default_state": arcade.FACE_LEFT,
+
+    }
+}
+
+ENEMIES = {
+    1: [
+        {
+            "name": "ladybug",
+            "center_x": 2200,
+            "center_y": 640,
+            "state": arcade.FACE_LEFT,
+            "speed": 6,
+        }
+    ],
+    2: [],
+    3: [],
+    4: [],
+}

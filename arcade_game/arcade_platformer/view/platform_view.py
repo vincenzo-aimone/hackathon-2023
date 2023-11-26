@@ -11,8 +11,9 @@ from speech.speech_recognition import speech_to_text_continuous
 from arcade_game.arcade_platformer.config.config import SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
     MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
     TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
-    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS
+    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS, ENEMIES, ENEMY_KILLED_TEXTS
 from arcade_game.arcade_platformer.player.player import Player
+from arcade_game.arcade_platformer.enemies.enemy import create_enemy
 from . import game_over_view, winner_view
 
 
@@ -33,6 +34,7 @@ class PlatformerView(arcade.View):
         self._init_minimap_variables()
         self._init_sounds()
         self._init_speech_recognizer()
+        self._init_cheat_flags()
 
         # Avoids leaving the mouse pointer in the middle
         self.window.set_mouse_visible(False)
@@ -64,14 +66,13 @@ class PlatformerView(arcade.View):
         self.level = 1
         self.time_start = default_timer()  # integer, expressing the time in seconds
         self.effects = arcade.SpriteList()
-        self.is_speaking = False
-        self._speak_random(WELCOME_TEXTS, 3)
 
     def _speak_random(self, text_list, duration=3):
         """
         Takes a list of texts to and our character speaks (in a bubble)
         for the duration given.
         """
+        logger.info("SPEAK RANDOM INVOKED")
         self._speak(random.choice(text_list), duration)
 
     def _init_map_variables(self):
@@ -103,6 +104,103 @@ class PlatformerView(arcade.View):
             "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
         self.recognize_proc.start()
         self.current_command = None
+
+    def _init_cheat_flags(self):
+        self.is_speed_boosted = False
+        self.is_score_boosted = False
+
+    def _boost_speed(self):
+        self.player.speed = PLAYER_MOVE_SPEED * 3
+        self.is_speed_boosted = True
+
+    def _boost_score(self):
+        self.score = 99999999999999
+        self.is_score_boosted = True
+
+    def _screw_physics(self):
+        # self.physics_engine = arcade.PhysicsEnginePlatformer(
+        #     player_sprite=self.player,
+        #     platforms=self.walls,
+        #     gravity_constant=0.2,
+        #     ladders=self.ladders,
+        # )
+        # self.game_player.set_physics_engine(self.physics_engine)
+        self.game_player.physics_engine.gravity_constant = 0.2
+        for enemy in self.enemies:
+            enemy.physics_engine.gravity_constant = 0.2
+            enemy.change_y = 1
+
+    def _update_enemies(self, delta_time):
+        enemy_hit = arcade.check_for_collision_with_list(
+            sprite=self.player, sprite_list=self.enemies
+        )
+        if enemy_hit:
+            # if the player collide with the enemy from the top, the enemy dies
+            if self.player.center_y > enemy_hit[0].center_y + 80:
+                self._speak_random(ENEMY_KILLED_TEXTS)
+                enemy_hit[0].remove_from_sprite_lists()
+                # check if the enemy has a name property
+                if hasattr(enemy_hit[0], "name"):
+                    enemy_name = enemy_hit[0].name
+                    dead_sprite = arcade.Sprite(
+                        filename=str(ASSETS_PATH / "images" / "enemies" / f"{enemy_name}_dead.png"),
+                        scale=MAP_SCALING,
+                    )
+                    dead_sprite.center_x = enemy_hit[0].center_x
+                    dead_sprite.center_y = enemy_hit[0].center_y
+                    self.enemies_dead.append(dead_sprite)
+
+                    # play the enemy death sound
+                    arcade.play_sound(self.death_sound)
+            else:
+                # if enemy has slow property, update the player speed multiplier
+                if "slow" in enemy_hit[0].properties:
+                    slow_value = float(enemy_hit[0].properties["slow"])
+
+                    # if the player is slowed down, dont schedule another speed multiplier reset
+                    if not self.game_player.is_slowed_down():
+                        self.game_player.slow_down(slow_value)
+                        # render the slow sprite
+                        slow_sprite = arcade.Sprite(
+                            filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
+                            scale=MAP_SCALING,
+                        )
+
+                        slow_sprite.offset_x = 75
+                        slow_sprite.offset_y = 75
+                        self.effects.append(slow_sprite)
+
+                        def reset_speed_multiplier(value):
+                            self.game_player.reset_speed()
+                            self.effects.remove(slow_sprite)
+                            arcade.unschedule(reset_speed_multiplier)
+                        arcade.schedule(reset_speed_multiplier, 5)
+
+                    # if there is speed property, the enemy moves horizontally (left or right)
+
+        # Handle enemies animation
+        for enemy in self.enemies:
+            # if the enemy has a speed property, we update the 
+            # if "speed" in enemy.properties:
+                # enemy.change_x = float(enemy.properties["speed"])
+                # # enemy.change_y = 2
+
+            if enemy.left < 0:
+                enemy.change_direction()
+
+            if "jump_force" in enemy.properties:
+                if "last_jumped" in enemy.properties:
+                    if time() > (enemy.properties["last_jumped"] + enemy.properties["jump_interval"]):
+                        if enemy.physics_engine.can_jump():
+                            enemy.physics_engine.jump(enemy.properties["jump_force"])
+                            enemy.properties["last_jumped"] = time()
+                else:
+                    if enemy.physics_engine.can_jump():
+                        enemy.physics_engine.jump(enemy.properties["jump_force"])
+                        enemy.properties["last_jumped"] = time()
+
+            enemy.physics_engine.update()
+            enemy.update_animation(delta_time)
 
     def _draw_static_elements(self):
         self.walls.draw()
@@ -168,6 +266,7 @@ class PlatformerView(arcade.View):
 
     def _speak(self, text, duration):
         """Speaks the text (in a bubble) given for the duration"""
+        logger.info (f"SPEAK INVOKED: {self.is_speaking}")
         if self.is_speaking:
             return
         speech_sprite = arcade.Sprite(
@@ -179,11 +278,21 @@ class PlatformerView(arcade.View):
         speech_sprite.text = text
         self.effects.append(speech_sprite)
         self.is_speaking = True
+        logger.info (f"AT THE END: {self.is_speaking}")
+
 
         def _unset_speech_sprite(value):
-            self.effects.remove(speech_sprite)
-            self.is_speaking = False
-            arcade.unschedule(_unset_speech_sprite)
+            try:
+                self.effects.remove(speech_sprite)
+            except ValueError:
+                # If there is a speech bubble when the level ends,
+                # the scheduled function trying to remove a speech
+                # sprite that does not exist any more in the new level
+                # will throw a ValueError.
+                pass
+            finally:
+                self.is_speaking = False
+                arcade.unschedule(_unset_speech_sprite)
         arcade.schedule(_unset_speech_sprite, duration)
 
     def setup(self):
@@ -231,17 +340,30 @@ class PlatformerView(arcade.View):
             self.traps = game_map.sprite_lists["traps"]
 
         # Only load enemies in maps with some enemies
-        if "enemies" in game_map.sprite_lists:
-            self.enemies = game_map.sprite_lists["enemies"]
-            # add physycs engine to the enemy
-            for enemy in self.enemies:
-                enemy.physics_engine = arcade.PhysicsEnginePlatformer(
-                    player_sprite=enemy,
-                    platforms=self.walls,
-                    gravity_constant=GRAVITY,
-                    ladders=self.ladders,
-                )
+        # if "enemies" in game_map.sprite_lists:
+        #     self.enemies = game_map.sprite_lists["enemies"]
+        #     # add physycs engine to the enemy
+        #     for enemy in self.enemies:
+        #         enemy.physics_engine = arcade.PhysicsEnginePlatformer(
+        #             player_sprite=enemy,
+        #             platforms=self.walls,
+        #             gravity_constant=GRAVITY,
+        #             ladders=self.ladders,
+        #         )
+        # import pdb; pdb.set_trace()
 
+        # Load enemies from config
+        # self.enemies.sprite_list = [Enemy(**e_cfg) for e_cfg in ENEMIES[self.level]]
+        for e_cfg in ENEMIES[self.level]:
+            self.enemies.append(create_enemy(**e_cfg))
+        for enemy in self.enemies:
+            enemy.physics_engine = arcade.PhysicsEnginePlatformer(
+                player_sprite=enemy,
+                platforms=self.walls,
+                gravity_constant=GRAVITY,
+                ladders=self.ladders,
+            )
+        # import pdb; pdb.set_trace()
 
         # Set the background color
         background_color = arcade.color.FRESH_AIR
@@ -272,11 +394,15 @@ class PlatformerView(arcade.View):
         # Load the physics engine for this map
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             player_sprite=self.player,
-            platforms=self.walls,
+            platforms=self.walls, # TODO: Add rocks here?
             gravity_constant=GRAVITY,
             ladders=self.ladders,
         )
         self.game_player.set_physics_engine(self.physics_engine)
+
+        # Speak random stuff at the beginning of each level
+        self.is_speaking = False
+        self._speak_random(WELCOME_TEXTS, 3)
 
     def update_player_direction(self):
         """
@@ -354,7 +480,6 @@ class PlatformerView(arcade.View):
             - Send it back to the beginning of the level
             - Face the player forward
         """
-
         # Play the death sound
         arcade.play_sound(self.death_sound)
         # Add 1 second of waiting time to let the user understand they fell
@@ -483,6 +608,14 @@ class PlatformerView(arcade.View):
             elif self.current_command == "turn":
                 logger.info("[PLATFORM]: Turning")
                 self.game_player.turn()
+            elif self.current_command == "barry allen":
+                self._boost_speed()
+                # import pdb; pdb.set_trace()
+                logger.info("[PLATFORM]: BARRY ALLEN")
+            elif self.current_command == "super lotto":
+                self._boost_score()
+                # self._screw_physics()
+                logger.info("[PLATFORM]: SUPER LOTTO")
 
         if self.physics_engine.is_on_ladder():
             for ladder in self.ladders:
@@ -492,7 +625,7 @@ class PlatformerView(arcade.View):
             if (current_ladder.top - self.player.bottom ) <= 25:
                 if self.player.change_y > 0:
                     self.player.change_y = 0
-                    self._speak_random(LADDER_TEXTS, 1.5)
+                    self._speak_random(LADDER_TEXTS, 3)
 
         # Update the player animation
         self.player.update_animation(delta_time)
@@ -529,76 +662,9 @@ class PlatformerView(arcade.View):
                 self.handle_player_death()
                 return
 
-        # Check for enemy collision, only in maps with enemies
+        # Updates related to enemies only on maps with enemies
         if self.enemies is not None:
-            enemy_hit = arcade.check_for_collision_with_list(
-                sprite=self.player, sprite_list=self.enemies
-            )
-            if enemy_hit:
-                # if the player collide with the enemy from the top, the enemy dies
-                if self.player.center_y > enemy_hit[0].center_y + 80:
-                    enemy_hit[0].remove_from_sprite_lists()
-                    # check if the enemy has a name property
-                    if "name" in enemy_hit[0].properties:
-                        enemy_name = enemy_hit[0].properties["name"]
-                        dead_sprite = arcade.Sprite(
-                            filename=str(ASSETS_PATH / "images" / "enemies" / f"{enemy_name}_dead.png"),
-                            scale=MAP_SCALING,
-                        )
-                        dead_sprite.center_x = enemy_hit[0].center_x
-                        dead_sprite.center_y = enemy_hit[0].center_y
-                        self.enemies_dead.append(dead_sprite)
-
-                        # play the enemy death sound
-                        arcade.play_sound(self.death_sound)
-                else:
-                    # if enemy has slow property, update the player speed multiplier
-                    if "slow" in enemy_hit[0].properties:
-                        slow_value = float(enemy_hit[0].properties["slow"])
-
-                        # if the player is slowed down, dont schedule another speed multiplier reset
-                        if not self.game_player.is_slowed_down():                    
-                            self.game_player.slow_down(slow_value)
-                            # render the slow sprite
-                            slow_sprite = arcade.Sprite(
-                                filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
-                                scale=MAP_SCALING,
-                            )
-
-                            slow_sprite.offset_x = 75
-                            slow_sprite.offset_y = 75
-                            self.effects.append(slow_sprite)
-
-                            def reset_speed_multiplier(value):
-                                self.game_player.reset_speed()
-                                self.effects.remove(slow_sprite)
-                                arcade.unschedule(reset_speed_multiplier)
-                            arcade.schedule(reset_speed_multiplier, 5)
-
-                        # if there is speed property, the enemy moves horizontally (left or right)
-           
-            # Handle enemies animation
-            for enemy in self.enemies:
-                # if the enemy has a speed property, we update the 
-                if "speed" in enemy.properties:
-                    enemy.change_x = float(enemy.properties["speed"])
-
-                    
-                    # if the enemy has a jump_delay property, the enemy jumps
-                    if "jump_force" in enemy.properties:
-                        if "last_jumped" in enemy.properties:
-                            if time() > (enemy.properties["last_jumped"] + enemy.properties["jump_interval"]):
-                                if enemy.physics_engine.can_jump():
-                                    enemy.physics_engine.jump(enemy.properties["jump_force"])
-                                    enemy.properties["last_jumped"] = time()
-                        else:
-                            if enemy.physics_engine.can_jump():
-                                enemy.physics_engine.jump(enemy.properties["jump_force"])
-                                enemy.properties["last_jumped"] = time()
-
-                enemy.physics_engine.update()
-                    
-                enemy.update_animation(delta_time)
+            self._update_enemies(delta_time)
 
 
         # Now check if we are at the ending goal
@@ -742,7 +808,7 @@ class PlatformerView(arcade.View):
         # Load our score image
         clock_image = arcade.load_texture(clock_image_path)
         arcade.draw_texture_rectangle(
-            170 + self.view_left,
+            170 + self.view_left + (int(self.is_score_boosted) * 250),
             30 + self.view_bottom,
             35, 35, clock_image)
 
@@ -752,7 +818,7 @@ class PlatformerView(arcade.View):
         # First set a black background for a shadow effect
         arcade.draw_text(
             timer_text,
-            start_x=190 + self.view_left,
+            start_x=190 + self.view_left + (int(self.is_score_boosted) * 250),
             start_y=15 + self.view_bottom,
             color=arcade.csscolor.BLACK,
             font_size=30
@@ -761,7 +827,7 @@ class PlatformerView(arcade.View):
         # Now in white
         arcade.draw_text(
             timer_text,
-            start_x=192 + self.view_left,
+            start_x=192 + self.view_left + (int(self.is_score_boosted) * 250),
             start_y=17 + self.view_bottom,
             color=arcade.csscolor.WHITE,
             font_size=30
