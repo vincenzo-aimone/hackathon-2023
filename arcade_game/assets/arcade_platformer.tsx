@@ -435,9 +435,6 @@
  <tile id="216">
   <image width="128" height="128" source="images/enemies/ladybug_move.png"/>
  </tile>
- <tile id="217">
-  <image width="123" height="123" source="../../../../../Downloads/IE.png"/>
- </tile>
  <tile id="218">
   <image width="70" height="70" source="images/items/clock.png"/>
  </tile>
@@ -457,5 +454,8 @@
  </tile>
  <tile id="221">
   <image width="128" height="128" source="images/enemies/snail_move.png"/>
+ </tile>
+ <tile id="222">
+  <image width="123" height="123" source="images/enemies/IE.png"/>
  </tile>
 </tileset>
