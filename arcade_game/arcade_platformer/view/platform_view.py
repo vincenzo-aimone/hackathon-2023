@@ -43,9 +43,9 @@ class PlatformerView(arcade.View):
         # Play the game start sound animation
         # There is a lag with the 1st sound played so to avoid having a lag during the game
         # when we take the 1st coin we play a sound for the start of the game
-        arcade.play_sound(self.ready_sound)
-        sleep(1)
-        arcade.play_sound(self.go_sound)
+        # arcade.play_sound(self.ready_sound)
+        # sleep(1)
+        # arcade.play_sound(self.go_sound)
 
     def _init_static_elements(self):
         self.coins = arcade.SpriteList()
@@ -143,8 +143,9 @@ class PlatformerView(arcade.View):
                 self._speak_random(ENEMY_KILLED_TEXTS)
                 enemy_hit[0].remove_from_sprite_lists()
                 # check if the enemy has a name property
-                if hasattr(enemy_hit[0], "name"):
-                    enemy_name = enemy_hit[0].name
+                # if hasattr(enemy_hit[0], "name"):
+                if "name" in enemy_hit[0].properties:
+                    enemy_name = enemy_hit[0].properties["name"]
                     dead_sprite = arcade.Sprite(
                         filename=str(ASSETS_PATH / "images" / "enemies" / f"{enemy_name}_dead.png"),
                         scale=MAP_SCALING,
@@ -158,26 +159,26 @@ class PlatformerView(arcade.View):
             else:
                 # if enemy has slow property, update the player speed multiplier
                 if "slow" in enemy_hit[0].properties:
+                    import pdb; pdb.set_trace()
                     slow_value = float(enemy_hit[0].properties["slow"])
-
                     # if the player is slowed down, dont schedule another speed multiplier reset
-                    if not self.game_player.is_slowed_down():
-                        self.game_player.slow_down(slow_value)
-                        # render the slow sprite
-                        slow_sprite = arcade.Sprite(
-                            filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
-                            scale=MAP_SCALING,
-                        )
+                    # if not self.game_player.is_slowed_down():
+                    self.game_player.slow_down(slow_value)
+                    # render the slow sprite
+                    slow_sprite = arcade.Sprite(
+                        filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
+                        scale=MAP_SCALING,
+                    )
 
-                        slow_sprite.offset_x = 75
-                        slow_sprite.offset_y = 75
-                        self.effects.append(slow_sprite)
+                    slow_sprite.offset_x = 75
+                    slow_sprite.offset_y = 75
+                    self.effects.append(slow_sprite)
 
-                        def reset_speed_multiplier(value):
-                            self.game_player.reset_speed()
-                            self.effects.remove(slow_sprite)
-                            arcade.unschedule(reset_speed_multiplier)
-                        arcade.schedule(reset_speed_multiplier, 5)
+                    def reset_speed_multiplier(value):
+                        self.game_player.reset_speed()
+                        self.effects.remove(slow_sprite)
+                        arcade.unschedule(reset_speed_multiplier)
+                    arcade.schedule(reset_speed_multiplier, 5)
 
                     # if there is speed property, the enemy moves horizontally (left or right)
 
@@ -347,16 +348,16 @@ class PlatformerView(arcade.View):
             self.traps = game_map.sprite_lists["traps"]
 
         # Only load enemies in maps with some enemies
-        # if "enemies" in game_map.sprite_lists:
-        #     self.enemies = game_map.sprite_lists["enemies"]
-        #     # add physycs engine to the enemy
-        #     for enemy in self.enemies:
-        #         enemy.physics_engine = arcade.PhysicsEnginePlatformer(
-        #             player_sprite=enemy,
-        #             platforms=self.walls,
-        #             gravity_constant=GRAVITY,
-        #             ladders=self.ladders,
-        #         )
+        if "enemies" in game_map.sprite_lists:
+            self.enemies = game_map.sprite_lists["enemies"]
+            # add physycs engine to the enemy
+            for enemy in self.enemies:
+                enemy.physics_engine = arcade.PhysicsEnginePlatformer(
+                    player_sprite=enemy,
+                    platforms=self.walls,
+                    gravity_constant=GRAVITY,
+                    ladders=self.ladders,
+                )
         # import pdb; pdb.set_trace()
 
         # Load enemies from config
@@ -423,7 +424,7 @@ class PlatformerView(arcade.View):
 
         # print hello world to check if the process is running
         print("Hello World")
-    
+
     def _process_command(self, command):
         # Process the command
         if command == "up":
@@ -459,7 +460,7 @@ class PlatformerView(arcade.View):
             self._screw_physics()
             logger.info("[PLATFORM]: SUPER LOTTO")
         self.last_command_time = time()
-    
+
     def _speak_if_idle(self):
         if time() - self.last_command_time > IDLE_COMMAND_TIME:
             self._speak_random(IDLE_TEXTS, IDLE_TEXT_DURATION)
