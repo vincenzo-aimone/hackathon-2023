@@ -1,40 +1,52 @@
 import arcade
 
-class Entity(arcade.Sprite):
-    def __init__(self, name_folder, name_file):
+from arcade_game.arcade_platformer.config.config import (
+    ASSETS_PATH, ENEMY_STATIC_INFO
+)
+
+
+def create_enemy(name: str, center_x: int, center_y: int,
+                 state: int, speed: int):
+    enemy = Enemy()
+    enemy.name = name
+    enemy.center_x = center_x
+    enemy.center_y = center_y
+    enemy.state = state
+    enemy.speed = speed
+    enemy.texture = enemy.current_texture
+
+    # Set change_x based on initial facing direction
+    if enemy.state == arcade.FACE_LEFT:
+        enemy.change_x = -1 * enemy.speed
+    else:
+        enemy.change_x = enemy.speed
+
+    return enemy
+
+
+class Enemy(arcade.Sprite):
+    def __init__(self):
         super().__init__()
 
-        # Default to facing right
-        self.facing_direction = RIGHT_FACING
+    def change_direction(self):
+        self.change_x *= -1
 
-        # Used for image sequences
-        self.cur_texture = 0
-        self.scale = CHARACTER_SCALING
-        self.character_face_direction = RIGHT_FACING
+        if self.state == arcade.FACE_LEFT:
+            self.state = arcade.FACE_RIGHT
+        else:
+            self.state = arcade.FACE_LEFT
+        self.texture = self.current_texture
 
-        main_path = f":resources:images/animated_characters/{name_folder}/{name_file}"
+    @property
+    def texture_path(self):
+        return str(ASSETS_PATH / "images" / "enemies" /  f"{self.name}.png")
 
-        self.idle_texture_pair = load_texture_pair(f"{main_path}_idle.png")
-        self.jump_texture_pair = load_texture_pair(f"{main_path}_jump.png")
-        self.fall_texture_pair = load_texture_pair(f"{main_path}_fall.png")
+    @property
+    def default_state(self):
+        return ENEMY_STATIC_INFO[self.name]["default_state"]
 
-        # Load textures for walking
-        self.walk_textures = []
-        for i in range(8):
-            texture = load_texture_pair(f"{main_path}_walk{i}.png")
-            self.walk_textures.append(texture)
-
-        # Load textures for climbing
-        self.climbing_textures = []
-        texture = arcade.load_texture(f"{main_path}_climb0.png")
-        self.climbing_textures.append(texture)
-        texture = arcade.load_texture(f"{main_path}_climb1.png")
-        self.climbing_textures.append(texture)
-
-        # Set the initial texture
-        self.texture = self.idle_texture_pair[0]
-
-        # Hit box will be set based on the first image used. If you want to specify
-        # a different hit box, you can do it like the code below.
-        # set_hit_box = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
-        self.hit_box = self.texture.hit_box_points
+    @property
+    def current_texture(self):
+        if self.state == self.default_state:
+            return arcade.load_texture(self.texture_path)
+        return arcade.load_texture(self.texture_path, mirrored=True)
