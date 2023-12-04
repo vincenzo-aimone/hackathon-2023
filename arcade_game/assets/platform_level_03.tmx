@@ -168,21 +168,21 @@
    <properties>
     <property name="display" value="none"/>
     <property name="priority" value="3"/>
-    <property name="slow" value="0.6"/>
+    <property name="slow" value="0.8"/>
    </properties>
   </object>
   <object id="39" gid="222" x="3844.23" y="2403.18" width="128" height="128" visible="0">
    <properties>
     <property name="display" value="none"/>
     <property name="priority" value="2"/>
-    <property name="slow" value="0.7"/>
+    <property name="slow" value="0.8"/>
    </properties>
   </object>
   <object id="40" gid="222" x="4391.24" y="2417.58" width="128" height="128" visible="0">
    <properties>
     <property name="display" value="none"/>
     <property name="priority" value="4"/>
-    <property name="slow" value="0.5"/>
+    <property name="slow" value="0.8"/>
    </properties>
   </object>
  </objectgroup>

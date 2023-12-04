@@ -90,6 +90,8 @@ class Player:
         # Set the player defaults
         player.center_x = PLAYER_START_X
         player.center_y = PLAYER_START_Y
+        player.previous_x = player.center_x
+        player.previous_y = player.center_y
         player.state = arcade.FACE_RIGHT
         player.speed = PLAYER_MOVE_SPEED
 

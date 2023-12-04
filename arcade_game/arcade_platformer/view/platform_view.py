@@ -12,7 +12,7 @@ from arcade_game.arcade_platformer.config.config import SCREEN_WIDTH, SCREEN_HEI
     MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
     TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
     MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS, ENEMIES, ENEMY_KILLED_TEXTS, \
-    IDLE_COMMAND_TIME, IDLE_TEXTS, IDLE_TEXT_DURATION
+    IDLE_COMMAND_TIME, IDLE_TEXTS, IDLE_TEXT_DURATION, IE_KILLED_TEXTS
 from arcade_game.arcade_platformer.player.player import Player
 from arcade_game.arcade_platformer.enemies.enemy import create_enemy
 from . import game_over_view, winner_view
@@ -43,9 +43,9 @@ class PlatformerView(arcade.View):
         # Play the game start sound animation
         # There is a lag with the 1st sound played so to avoid having a lag during the game
         # when we take the 1st coin we play a sound for the start of the game
-        # arcade.play_sound(self.ready_sound)
-        # sleep(1)
-        # arcade.play_sound(self.go_sound)
+        arcade.play_sound(self.ready_sound)
+        sleep(1)
+        arcade.play_sound(self.go_sound)
 
     def _init_static_elements(self):
         self.coins = arcade.SpriteList()
@@ -65,17 +65,17 @@ class PlatformerView(arcade.View):
         self.physics_engine = None
         self.score = 0
         self.life_count = TOTAL_LIFE_COUNT
-        self.level = 2
+        self.level = 1
         self.time_start = default_timer()  # integer, expressing the time in seconds
         self.effects = arcade.SpriteList()
 
-    def _speak_random(self, text_list, duration=3):
+    def _speak_random(self, text_list, duration=3, force=False):
         """
         Takes a list of texts to and our character speaks (in a bubble)
         for the duration given.
         """
         logger.info("SPEAK RANDOM INVOKED")
-        self._speak(random.choice(text_list), duration)
+        self._speak(random.choice(text_list), duration, force)
 
     def _init_map_variables(self):
         self.map_width = 0
@@ -139,7 +139,9 @@ class PlatformerView(arcade.View):
         )
         if enemy_hit:
             # if the player collide with the enemy from the top, the enemy dies
-            if self.player.center_y > enemy_hit[0].center_y + 80:
+            if ((self.player.center_y > enemy_hit[0].center_y + 80) or
+                (("name" in enemy_hit[0].properties) and
+                 (enemy_hit[0].properties["name"] == "IE"))):
                 self._speak_random(ENEMY_KILLED_TEXTS)
                 enemy_hit[0].remove_from_sprite_lists()
                 # check if the enemy has a name property
@@ -154,6 +156,21 @@ class PlatformerView(arcade.View):
                     dead_sprite.center_y = enemy_hit[0].center_y
                     self.enemies_dead.append(dead_sprite)
 
+                    if enemy_hit[0].properties["name"] == "IE":
+                        # IE has been killed
+                        # Reset the player speed multiplier
+                        self.game_player.reset_speed()
+                        # Remove the invisible slowing enemies from the sprite list
+                        self.enemies = arcade.SpriteList()
+                        # Remove the v8 sprite from the effects list
+                        for effect in self.effects:
+                            if effect.name == "v8":
+                                self.effects.remove(effect)
+                        self.game_player.stop()
+                        self._speak_random(IE_KILLED_TEXTS, force=True)
+                    elif enemy_hit[0].properties.get("name", "") != "IE":
+                        self._speak_random(ENEMY_KILLED_TEXTS, force=True)
+
                     # play the enemy death sound
                     arcade.play_sound(self.death_sound)
             else:
@@ -166,20 +183,20 @@ class PlatformerView(arcade.View):
                     # if not self.game_player.is_slowed_down():
                     self.game_player.slow_down(slow_value, slow_priority)
                     # render the slow sprite
-                    slow_sprite = arcade.Sprite(
-                        filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
-                        scale=MAP_SCALING,
-                    )
+                    # slow_sprite = arcade.Sprite(
+                    #     filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),
+                    #     scale=MAP_SCALING,
+                    # )
 
-                    slow_sprite.offset_x = 75
-                    slow_sprite.offset_y = 75
-                    self.effects.append(slow_sprite)
+                    # slow_sprite.offset_x = 75
+                    # slow_sprite.offset_y = 75
+                    # self.effects.append(slow_sprite)
 
-                    def reset_speed_multiplier(value):
-                        self.game_player.reset_speed()
-                        self.effects.remove(slow_sprite)
-                        arcade.unschedule(reset_speed_multiplier)
-                    arcade.schedule(reset_speed_multiplier, 5)
+                    # def reset_speed_multiplier(value):
+                    #     self.game_player.reset_speed()
+                    #     self.effects.remove(slow_sprite)
+                    #     arcade.unschedule(reset_speed_multiplier)
+                    # arcade.schedule(reset_speed_multiplier, 5)
 
                     # if there is speed property, the enemy moves horizontally (left or right)
 
@@ -272,10 +289,9 @@ class PlatformerView(arcade.View):
             self._draw_static_elements()
             self._draw_actors()
 
-    def _speak(self, text, duration):
+    def _speak(self, text, duration, force=False):
         """Speaks the text (in a bubble) given for the duration"""
-        logger.info (f"SPEAK INVOKED: {self.is_speaking}")
-        if self.is_speaking:
+        if self.is_speaking and not force:
             return
         speech_sprite = arcade.Sprite(
             filename=str(ASSETS_PATH / "images" / "speech_bubbles" / "two.png"),
@@ -286,7 +302,6 @@ class PlatformerView(arcade.View):
         speech_sprite.text = text
         self.effects.append(speech_sprite)
         self.is_speaking = True
-        logger.info (f"AT THE END: {self.is_speaking}")
 
 
         def _unset_speech_sprite(value):
@@ -418,6 +433,7 @@ class PlatformerView(arcade.View):
         self.is_speaking = False
         self._speak_random(WELCOME_TEXTS, 3)
         self.last_command_time = time()
+        self.last_player_check_time = time()
 
     def update_player_direction(self):
         """
@@ -656,6 +672,15 @@ class PlatformerView(arcade.View):
 
         self._speak_if_idle()
 
+        if (time() - self.last_player_check_time > 0.5):
+            if ((self.player.center_x == self.player.previous_x) and
+                (self.player.center_y == self.player.previous_y)):
+                self.player.stop()
+            else:
+                self.player.previous_x = self.player.center_x
+                self.player.previous_y = self.player.center_y
+            self.last_player_check_time = time()
+
         # Update the player animation
         self.player.update_animation(delta_time)
 
@@ -702,6 +727,14 @@ class PlatformerView(arcade.View):
             if engine_hit:
                 # if the player collide with the engine, remove the engine from the sprite list
                 engine_hit[0].remove_from_sprite_lists()
+                engine_sprite = arcade.Sprite(
+                    filename=str(ASSETS_PATH / "images" / "items" / "v8.png"),
+                    scale=MAP_SCALING,
+                )
+                engine_sprite.offset_x = 75
+                engine_sprite.offset_y = 75
+                engine_sprite.name = "v8"
+                self.effects.append(engine_sprite)
 
         # Now check if we are at the ending goal
         goals_hit = arcade.check_for_collision_with_list(
