@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="12" nextobjectid="12">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="13" nextobjectid="12">
  <tileset firstgid="1" source="arcade_platformer.tsx"/>
  <layer id="1" name="ground" width="40" height="20">
   <data encoding="base64" compression="zlib">
-   eAFjYBgFoyEwGgKjITAaAqMhMBoCoyEwGgKDKQTOAh1zjkR8fjB5gA5uOcTA0IDNmgPYBNHErkL56DSaMpzcy0AZauBJQHPQMTXMPQI0lxp4ItAcdEwNcwHbN00a
+   eAFjYBgFoyEwGgKjITAaAqMhMBoCoyEwGgKDKQTOAh1zjkR8fjB5gA5uOcTA0IDNmgPYBNHErkL56DSaMpzcy0AZamBsFlDD3CNAg6mBJwLNQcfUMBcALrlKQA==
   </data>
  </layer>
  <objectgroup id="11" name="enemies"/>
@@ -15,6 +15,11 @@
  <layer id="3" name="goal" width="40" height="20" offsetx="-12" offsety="4">
   <data encoding="base64" compression="zlib">
    eAFjYBgFoyEwGgKjITAaAqMhMBoCoyEwGgKjIUD/EMiiv5Uk2ZhJkupRxcSGAABqVwDU
+  </data>
+ </layer>
+ <layer id="12" name="traps" width="40" height="20">
+  <data encoding="base64" compression="zlib">
+   eAHt0LENAAAIAjD+H71YZw/QpSTMkCZCgAABAgQIECBAgMC1QM3g7vWHj70GuP4C2w==
   </data>
  </layer>
  <objectgroup id="8" name="coins">
