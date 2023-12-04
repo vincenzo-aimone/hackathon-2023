@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="50" height="25" tilewidth="128" tileheight="128" infinite="0" nextlayerid="11" nextobjectid="37">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="50" height="25" tilewidth="128" tileheight="128" infinite="0" nextlayerid="12" nextobjectid="40">
  <tileset firstgid="1" source="arcade_platformer.tsx"/>
  <layer id="7" name="ground" width="50" height="25">
   <data encoding="csv">
@@ -152,6 +152,9 @@
   <object id="26" gid="57" x="776" y="2928" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="8" name="enemies">
-  <object id="34" name="IE" gid="223" x="4683" y="2378" width="211" height="211"/>
+  <object id="34" name="IE" gid="223" x="4710.27" y="2384.06" width="171.606" height="171.606"/>
+ </objectgroup>
+ <objectgroup id="11" name="engine">
+  <object id="39" gid="226" x="3411.73" y="2395.33" width="98.7576" height="98.7576"/>
  </objectgroup>
 </map>

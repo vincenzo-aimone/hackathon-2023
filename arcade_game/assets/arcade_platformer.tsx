@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="133" columns="0">
+<tileset version="1.10" tiledversion="1.10.2" name="arcade_platformer" tilewidth="128" tileheight="128" tilecount="135" columns="0">
  <editorsettings>
   <export target="arcade_platformer.tsx" format="tsx"/>
  </editorsettings>
@@ -457,5 +457,11 @@
  </tile>
  <tile id="222">
   <image width="123" height="123" source="images/enemies/IE.png"/>
+ </tile>
+ <tile id="225">
+  <image width="123" height="123" source="images/items/v8.png"/>
+ </tile>
+ <tile id="227">
+  <image width="123" height="123" source="images/enemies/IE_dead.png"/>
  </tile>
 </tileset>
