@@ -3,7 +3,7 @@
  <tileset firstgid="1" source="arcade_platformer.tsx"/>
  <layer id="1" name="ground" width="40" height="20">
   <data encoding="base64" compression="zlib">
-   eAFjYBgFoyEwGgKjITAaAqMhMBoCoyEwGgKDKQTOAh1zjkR8fjB5gA5uOcTA0IDNmgPYBNHErkL56DSaMpzcy0AZamBsFlDD3CNAg6mBJwLNQcfUMBcALrlKQA==
+   eAFjYBgFoyEwGgKjITAaAqMhMBoCoyEwGgKDKQTOAh1zjkR8noYeuAg0+zIU09Aakow+xMDQANIActtpID4CxQeANCFwFaoAnSakDyYPCwtiaGS3gdyIrAdmHjKNLE8uGxYWlNITgQ5Dx5SaCdIPAOezT6Y=
   </data>
  </layer>
  <objectgroup id="11" name="enemies"/>
@@ -23,7 +23,7 @@
   </data>
  </layer>
  <objectgroup id="8" name="coins">
-  <object id="9" gid="56" x="1152" y="2080" width="128" height="128"/>
+  <object id="9" gid="56" x="2048" y="1908" width="128" height="128"/>
   <object id="10" gid="56" x="3584" y="1924" width="128" height="128"/>
   <object id="11" gid="56" x="384" y="2304" width="128" height="128"/>
  </objectgroup>
