@@ -65,7 +65,7 @@ class PlatformerView(arcade.View):
         self.physics_engine = None
         self.score = 0
         self.life_count = TOTAL_LIFE_COUNT
-        self.level = 3
+        self.level = 2
         self.time_start = default_timer()  # integer, expressing the time in seconds
         self.effects = arcade.SpriteList()
 
@@ -353,6 +353,8 @@ class PlatformerView(arcade.View):
             self.enemies = game_map.sprite_lists["enemies"]
             # add physycs engine to the enemy
             for enemy in self.enemies:
+                if "display" in enemy.properties and enemy.properties["display"] == "none":
+                    enemy.visible = False
                 enemy.physics_engine = arcade.PhysicsEnginePlatformer(
                     player_sprite=enemy,
                     platforms=self.walls,
