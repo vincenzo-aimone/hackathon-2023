@@ -11,7 +11,8 @@ from speech.speech_recognition import speech_to_text_continuous
 from arcade_game.arcade_platformer.config.config import SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
     MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
     TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
-    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS, ENEMIES, ENEMY_KILLED_TEXTS
+    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS, ENEMIES, ENEMY_KILLED_TEXTS, \
+    IDLE_COMMAND_TIME, IDLE_TEXTS, IDLE_TEXT_DURATION
 from arcade_game.arcade_platformer.player.player import Player
 from arcade_game.arcade_platformer.enemies.enemy import create_enemy
 from . import game_over_view, winner_view
@@ -63,7 +64,7 @@ class PlatformerView(arcade.View):
         self.physics_engine = None
         self.score = 0
         self.life_count = TOTAL_LIFE_COUNT
-        self.level = 1
+        self.level = 3
         self.time_start = default_timer()  # integer, expressing the time in seconds
         self.effects = arcade.SpriteList()
 
@@ -98,11 +99,11 @@ class PlatformerView(arcade.View):
     def _init_speech_recognizer(self):
         # Init object for the process
         self.message_queue = Queue()
-        self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
-            "message_queue": self.message_queue,
-            "api_key": os.environ.get('SPEECH_API_KEY'),
-            "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
-        self.recognize_proc.start()
+        # self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
+        #     "message_queue": self.message_queue,
+        #     "api_key": os.environ.get('SPEECH_API_KEY'),
+        #     "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
+        # self.recognize_proc.start()
         self.current_command = None
 
     def _init_cheat_flags(self):
@@ -125,7 +126,8 @@ class PlatformerView(arcade.View):
         #     ladders=self.ladders,
         # )
         # self.game_player.set_physics_engine(self.physics_engine)
-        self.game_player.physics_engine.gravity_constant = 0.2
+        self.game_player.physics_engine.gravity_constant = 0
+        self.game_player.player.center_y += 100
         for enemy in self.enemies:
             enemy.physics_engine.gravity_constant = 0.2
             enemy.change_y = 1
@@ -403,6 +405,7 @@ class PlatformerView(arcade.View):
         # Speak random stuff at the beginning of each level
         self.is_speaking = False
         self._speak_random(WELCOME_TEXTS, 3)
+        self.last_command_time = time()
 
     def update_player_direction(self):
         """
@@ -412,6 +415,47 @@ class PlatformerView(arcade.View):
 
         # print hello world to check if the process is running
         print("Hello World")
+    
+    def _process_command(self, command):
+        # Process the command
+        if command == "up":
+            logger.info("[PLATFORM]: Moving up")
+            self.game_player.move_up()
+        elif command == "down":
+            logger.info("[PLATFORM]: Moving down")
+            self.game_player.move_down()
+        elif command == "left":
+            logger.info("[PLATFORM]: Moving left")
+            self.game_player.move_left()
+        elif command == "right":
+            logger.info("[PLATFORM]: Moving right")
+            self.game_player.move_right()
+        elif command == "jump":
+            logger.info("[PLATFORM]: Jumping")
+            self.game_player.jump()
+        elif command == "stop":
+            self.game_player.stop()
+            logger.info("[PLATFORM]: Stopping")
+        elif command == "step":
+            self.game_player.step()
+            logger.info("[PLATFORM]: Stepping")
+        elif command == "turn":
+            logger.info("[PLATFORM]: Turning")
+            self.game_player.turn()
+        elif command == "barry allen":
+            self._boost_speed()
+            # import pdb; pdb.set_trace()
+            logger.info("[PLATFORM]: BARRY ALLEN")
+        elif command == "super lotto":
+            self._boost_score()
+            self._screw_physics()
+            logger.info("[PLATFORM]: SUPER LOTTO")
+        self.last_command_time = time()
+    
+    def _speak_if_idle(self):
+        if time() - self.last_command_time > IDLE_COMMAND_TIME:
+            self._speak_random(IDLE_TEXTS, IDLE_TEXT_DURATION)
+            self.last_command_time = time() + IDLE_TEXT_DURATION
 
     def get_game_time(self) -> int:
         """Returns the number of seconds since the game was initialised"""
@@ -582,40 +626,8 @@ class PlatformerView(arcade.View):
         # Check if we have a command from the speech recognition process
         if not self.message_queue.empty():
             self.current_command = self.message_queue.get()
+            self._process_command(self.current_command)
 
-            # Process the command
-            if self.current_command == "up":
-                logger.info("[PLATFORM]: Moving up")
-                self.game_player.move_up()
-            elif self.current_command == "down":
-                logger.info("[PLATFORM]: Moving down")
-                self.game_player.move_down()
-            elif self.current_command == "left":
-                logger.info("[PLATFORM]: Moving left")
-                self.game_player.move_left()
-            elif self.current_command == "right":
-                logger.info("[PLATFORM]: Moving right")
-                self.game_player.move_right()
-            elif self.current_command == "jump":
-                logger.info("[PLATFORM]: Jumping")
-                self.game_player.jump()
-            elif self.current_command == "stop":
-                self.game_player.stop()
-                logger.info("[PLATFORM]: Stopping")
-            elif self.current_command == "step":
-                self.game_player.step()
-                logger.info("[PLATFORM]: Stepping")
-            elif self.current_command == "turn":
-                logger.info("[PLATFORM]: Turning")
-                self.game_player.turn()
-            elif self.current_command == "barry allen":
-                self._boost_speed()
-                # import pdb; pdb.set_trace()
-                logger.info("[PLATFORM]: BARRY ALLEN")
-            elif self.current_command == "super lotto":
-                self._boost_score()
-                # self._screw_physics()
-                logger.info("[PLATFORM]: SUPER LOTTO")
 
         if self.physics_engine.is_on_ladder():
             for ladder in self.ladders:
@@ -626,6 +638,8 @@ class PlatformerView(arcade.View):
                 if self.player.change_y > 0:
                     self.player.change_y = 0
                     self._speak_random(LADDER_TEXTS, 3)
+
+        self._speak_if_idle()
 
         # Update the player animation
         self.player.update_animation(delta_time)
