@@ -19,7 +19,7 @@
 </data>
  </layer>
  <objectgroup id="8" name="enemies">
-  <object id="13" gid="213" x="1468" y="1404" width="128" height="128"/>
+  <object id="13" name="barnacle" gid="213" x="1468" y="1404" width="128" height="128"/>
  </objectgroup>
  <layer id="6" name="traps" width="37" height="13">
   <data encoding="csv">
