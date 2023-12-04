@@ -100,11 +100,11 @@ class PlatformerView(arcade.View):
     def _init_speech_recognizer(self):
         # Init object for the process
         self.message_queue = Queue()
-        # self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
-        #     "message_queue": self.message_queue,
-        #     "api_key": os.environ.get('SPEECH_API_KEY'),
-        #     "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
-        # self.recognize_proc.start()
+        self.recognize_proc = Process(target=speech_to_text_continuous, kwargs={
+            "message_queue": self.message_queue,
+            "api_key": os.environ.get('SPEECH_API_KEY'),
+            "speech_region": os.environ.get('SPEECH_REGION')}, name="T1")
+        self.recognize_proc.start()
         self.current_command = None
 
     def _init_cheat_flags(self):
@@ -159,11 +159,12 @@ class PlatformerView(arcade.View):
             else:
                 # if enemy has slow property, update the player speed multiplier
                 if "slow" in enemy_hit[0].properties:
-                    import pdb; pdb.set_trace()
+                    # import pdb; pdb.set_trace()
                     slow_value = float(enemy_hit[0].properties["slow"])
+                    slow_priority = float(enemy_hit[0].properties["priority"])
                     # if the player is slowed down, dont schedule another speed multiplier reset
                     # if not self.game_player.is_slowed_down():
-                    self.game_player.slow_down(slow_value)
+                    self.game_player.slow_down(slow_value, slow_priority)
                     # render the slow sprite
                     slow_sprite = arcade.Sprite(
                         filename=str(ASSETS_PATH / "images" / "items" / "slow.png"),

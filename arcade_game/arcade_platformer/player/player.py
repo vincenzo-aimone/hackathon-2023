@@ -13,6 +13,7 @@ class Player:
         self.player = self.create_player_sprite()
         self.physics_engine = None
         self.speed_multiplier = 1
+        self.slow_priority = 0
         self.jump_sound = arcade.load_sound(
             str(ASSETS_PATH / "sounds" / "jump.wav")
         )
@@ -123,15 +124,18 @@ class Player:
         self.player.change_x = 0
         self.player.change_y = 0
         
-    def slow_down(self, value: float = 0.5):
-        self.speed_multiplier = value
-        self.player.change_x *= self.speed_multiplier
-        self.player.change_y *= self.speed_multiplier
+    def slow_down(self, value: float, slow_priority: int):
+        if slow_priority > self.slow_priority:
+            self.speed_multiplier = value ** slow_priority
+            self.player.change_x *= self.speed_multiplier
+            self.player.change_y *= self.speed_multiplier
+            self.slow_priority = slow_priority
         
     def reset_speed(self):
         self.player.change_x /= self.speed_multiplier
         self.player.change_y /= self.speed_multiplier
         self.speed_multiplier = 1
+        self.slow_priority = 0
         
     def is_slowed_down(self):
         return self.speed_multiplier != 1
