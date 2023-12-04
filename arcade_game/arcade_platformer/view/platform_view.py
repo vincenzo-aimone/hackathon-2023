@@ -54,6 +54,7 @@ class PlatformerView(arcade.View):
     def _init_actors(self):
         self.enemies = arcade.SpriteList()
         self.enemies_dead = arcade.SpriteList()
+        self.engine = arcade.SpriteList()
         self.player = self.game_player.player
 
     def _init_dynamic_elements(self):
@@ -105,6 +106,9 @@ class PlatformerView(arcade.View):
         # Not all maps have traps
         if self.traps is not None:
             self.traps.draw()
+
+        if self.engine is not None:
+            self.engine.draw()
 
     def _draw_actors(self):
         self.player.draw()
@@ -185,6 +189,9 @@ class PlatformerView(arcade.View):
                     ladders=self.ladders,
                 )
 
+        # Only load engines in maps with some engines
+        if "engine" in game_map.sprite_lists:
+            self.engine = game_map.sprite_lists["engine"]
 
         # Set the background color
         background_color = arcade.color.FRESH_AIR
@@ -388,6 +395,9 @@ class PlatformerView(arcade.View):
         for coin in self.coins:
             coin.update_animation(delta_time)
 
+        for background in self.background:
+            background.update_animation(delta_time)
+
         # Handle traps animation
         if self.traps is not None:
             for trap in self.traps:
@@ -538,6 +548,13 @@ class PlatformerView(arcade.View):
                     
                 enemy.update_animation(delta_time)
 
+        if self.engine is not None:
+            engine_hit = arcade.check_for_collision_with_list(
+                sprite=self.player, sprite_list=self.engine
+            )
+            if engine_hit:
+                # if the player collide with the engine, remove the engine from the sprite list
+                engine_hit[0].remove_from_sprite_lists()
 
         # Now check if we are at the ending goal
         goals_hit = arcade.check_for_collision_with_list(
