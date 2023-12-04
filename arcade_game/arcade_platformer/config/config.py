@@ -19,7 +19,7 @@ MAP_SCALING = 1
 GRAVITY = 1.0
 PLAYER_START_X = 65 * NEW_SCALING
 PLAYER_START_Y = 256 * NEW_SCALING
-PLAYER_MOVE_SPEED = 20
+PLAYER_MOVE_SPEED = 6
 PLAYER_JUMP_SPEED = 25
 
 # Viewport (horizontal/vertical scroll) margins
@@ -76,6 +76,10 @@ ENEMY_KILLED_TEXTS = [
     "You don't mess with the Roz..an",
     "Was that meant to be challenging or something?",
     "This is getting boring now.."
+]
+IE_KILLED_TEXTS = [
+    "I'm not sure what I expected",
+    "What just happened?",
 ]
 
 ENEMY_STATIC_INFO = {
