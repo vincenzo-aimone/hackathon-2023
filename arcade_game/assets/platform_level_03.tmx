@@ -152,26 +152,37 @@
   <object id="26" gid="57" x="776" y="2928" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="8" name="enemies">
-  <object id="34" name="IE" gid="223" x="4683" y="2378" width="211" height="211"/>
-  <object id="37" gid="222" x="3592.32" y="2410.38" width="128" height="128">
+  <object id="34" name="IE" gid="223" x="4683" y="2378" width="211" height="211">
+   <properties>
+    <property name="display" value="block"/>
+   </properties>
+  </object>
+  <object id="37" gid="222" x="3592.32" y="2410.38" width="128" height="128" visible="0">
    <properties>
     <property name="display" value="none"/>
+    <property name="priority" value="1"/>
     <property name="slow" value="0.8"/>
    </properties>
   </object>
-  <object id="38" gid="222" x="4103.34" y="2424.77" width="128" height="128">
+  <object id="38" gid="222" x="4103.34" y="2424.77" width="128" height="128" visible="0">
    <properties>
-    <property name="slow" value="0.8"/>
+    <property name="display" value="none"/>
+    <property name="priority" value="3"/>
+    <property name="slow" value="0.6"/>
    </properties>
   </object>
-  <object id="39" gid="222" x="3844.23" y="2403.18" width="128" height="128">
+  <object id="39" gid="222" x="3844.23" y="2403.18" width="128" height="128" visible="0">
    <properties>
-    <property name="slow" value="0.8"/>
+    <property name="display" value="none"/>
+    <property name="priority" value="2"/>
+    <property name="slow" value="0.7"/>
    </properties>
   </object>
-  <object id="40" gid="222" x="4391.24" y="2417.58" width="128" height="128">
+  <object id="40" gid="222" x="4391.24" y="2417.58" width="128" height="128" visible="0">
    <properties>
-    <property name="slow" value="0.8"/>
+    <property name="display" value="none"/>
+    <property name="priority" value="4"/>
+    <property name="slow" value="0.5"/>
    </properties>
   </object>
  </objectgroup>
