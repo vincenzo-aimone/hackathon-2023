@@ -8,11 +8,12 @@ import random
 import arcade
 
 from speech.speech_recognition import speech_to_text_continuous
-from arcade_game.arcade_platformer.config.config import BOSS_FIGHT_TEXTS, SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
-    MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
-    TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
-    MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS, ENEMIES, ENEMY_KILLED_TEXTS, \
-    IDLE_COMMAND_TIME, IDLE_TEXTS, IDLE_TEXT_DURATION, IE_KILLED_TEXTS
+# from arcade_game.arcade_platformer.config.config import BOSS_FIGHT_TEXTS, SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
+#     MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
+#     TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
+#     MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS, ENEMIES, ENEMY_KILLED_TEXTS, \
+#     IDLE_COMMAND_TIME, IDLE_TEXTS, IDLE_TEXT_DURATION, IE_KILLED_TEXTS
+from arcade_game.arcade_platformer.config.config import *
 from arcade_game.arcade_platformer.player.player import Player
 from arcade_game.arcade_platformer.enemies.enemy import create_enemy
 from . import game_over_view, winner_view
@@ -215,25 +216,25 @@ class PlatformerView(arcade.View):
             # As the player is getting close to an enemy having name IE, we make the background more darker, based on the distance
             if "name" in enemy.properties and enemy.properties["name"] == "IE":
                 if arcade.get_distance_between_sprites(self.player, enemy) < 250:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_0)
+                    arcade.set_background_color(FRESH_AIR_0)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 500:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_10)
+                    arcade.set_background_color(FRESH_AIR_10)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 750:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_20)
+                    arcade.set_background_color(FRESH_AIR_20)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 1000:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_30)
+                    arcade.set_background_color(FRESH_AIR_30)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 1250:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_40)
+                    arcade.set_background_color(FRESH_AIR_40)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 1500:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_50)
+                    arcade.set_background_color(FRESH_AIR_50)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 1750:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_60)
+                    arcade.set_background_color(FRESH_AIR_60)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 2000:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_70)
+                    arcade.set_background_color(FRESH_AIR_70)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 2250:
-                    arcade.set_background_color(arcade.color.FRESH_AIR_80)
+                    arcade.set_background_color(FRESH_AIR_80)
                 elif arcade.get_distance_between_sprites(self.player, enemy) < 2500:
-                     arcade.set_background_color(arcade.color.FRESH_AIR_90)
+                     arcade.set_background_color(FRESH_AIR_90)
                 else:
                     arcade.set_background_color(arcade.color.FRESH_AIR)
 
