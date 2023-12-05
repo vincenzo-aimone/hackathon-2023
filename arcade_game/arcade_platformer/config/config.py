@@ -19,7 +19,7 @@ MAP_SCALING = 1
 GRAVITY = 1.0
 PLAYER_START_X = 65 * NEW_SCALING
 PLAYER_START_Y = 256 * NEW_SCALING
-PLAYER_MOVE_SPEED = 6
+PLAYER_MOVE_SPEED = 20
 PLAYER_JUMP_SPEED = 25
 
 # Viewport (horizontal/vertical scroll) margins
@@ -52,6 +52,12 @@ IDLE_TEXT_DURATION = 3
 WELCOME_TEXTS = [
     "Showtime, baby!",
     "Howdy folks!",
+]
+BOSS_FIGHT_TEXTS = [
+    "Everything seems to get slower...",
+    "I'm feeling... weird...",
+    "What's happening to me?",
+    "Someone said IE was not a real browser...I'm starting to believe them...",
 ]
 LADDER_TEXTS = [
     "This is exhausting! I need a vacation...",

@@ -8,7 +8,7 @@ import random
 import arcade
 
 from speech.speech_recognition import speech_to_text_continuous
-from arcade_game.arcade_platformer.config.config import SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
+from arcade_game.arcade_platformer.config.config import BOSS_FIGHT_TEXTS, SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_LIFE_COUNT, ASSETS_PATH, \
     MAP_SCALING, PLAYER_START_X, PLAYER_START_Y, GRAVITY, LEFT_VIEWPORT_MARGIN, RIGHT_VIEWPORT_MARGIN, \
     TOP_VIEWPORT_MARGIN, BOTTOM_VIEWPORT_MARGIN, PLAYER_MOVE_SPEED, PLAYER_JUMP_SPEED, MINIMAP_HEIGHT, MINIMAP_WIDTH, \
     MAP_WIDTH, MAP_HEIGHT, MINIMAP_BACKGROUND_COLOR, LADDER_TEXTS, WELCOME_TEXTS, ENEMIES, ENEMY_KILLED_TEXTS, \
@@ -65,7 +65,7 @@ class PlatformerView(arcade.View):
         self.physics_engine = None
         self.score = 0
         self.life_count = TOTAL_LIFE_COUNT
-        self.level = 1
+        self.level = 3
         self.time_start = default_timer()  # integer, expressing the time in seconds
         self.effects = arcade.SpriteList()
 
@@ -96,6 +96,7 @@ class PlatformerView(arcade.View):
         self.jump_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "jump.wav"))
         self.level_victory_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "level_victory.wav"))
         self.death_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "death.wav"))
+        self.boss_music = arcade.load_sound(str(ASSETS_PATH / "sounds" / "sound_of_silence.wav"))
 
     def _init_speech_recognizer(self):
         # Init object for the process
@@ -160,6 +161,10 @@ class PlatformerView(arcade.View):
                         # IE has been killed
                         # Reset the player speed multiplier
                         self.game_player.reset_speed()
+                        # Restore the background to its original color
+                        arcade.set_background_color(arcade.color.FRESH_AIR)
+                        # stop playing the boss fight sound
+                        arcade.stop_sound(self.boss_music_playing_object)
                         # Remove the invisible slowing enemies from the sprite list
                         self.enemies = arcade.SpriteList()
                         # Remove the v8 sprite from the effects list
@@ -206,6 +211,32 @@ class PlatformerView(arcade.View):
             # if "speed" in enemy.properties:
                 # enemy.change_x = float(enemy.properties["speed"])
                 # # enemy.change_y = 2
+
+            # As the player is getting close to an enemy having name IE, we make the background more darker, based on the distance
+            if "name" in enemy.properties and enemy.properties["name"] == "IE":
+                if arcade.get_distance_between_sprites(self.player, enemy) < 250:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_0)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 500:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_10)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 750:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_20)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 1000:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_30)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 1250:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_40)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 1500:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_50)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 1750:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_60)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 2000:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_70)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 2250:
+                    arcade.set_background_color(arcade.color.FRESH_AIR_80)
+                elif arcade.get_distance_between_sprites(self.player, enemy) < 2500:
+                     arcade.set_background_color(arcade.color.FRESH_AIR_90)
+                else:
+                    arcade.set_background_color(arcade.color.FRESH_AIR)
+
 
             if enemy.left < 0:
                 enemy.change_direction()
@@ -431,7 +462,12 @@ class PlatformerView(arcade.View):
 
         # Speak random stuff at the beginning of each level
         self.is_speaking = False
-        self._speak_random(WELCOME_TEXTS, 3)
+        if self.level == 3:
+            # play the boss fight sound
+            self.boss_music_playing_object = arcade.play_sound(self.boss_music)
+            self._speak_random(BOSS_FIGHT_TEXTS, 3)
+        else:
+            self._speak_random(WELCOME_TEXTS, 3)
         self.last_command_time = time()
         self.last_player_check_time = time()
 
@@ -482,7 +518,17 @@ class PlatformerView(arcade.View):
 
     def _speak_if_idle(self):
         if time() - self.last_command_time > IDLE_COMMAND_TIME:
-            self._speak_random(IDLE_TEXTS, IDLE_TEXT_DURATION)
+            # Check if IE is still alive and store in a variable
+            ie_alive = False
+            for enemy in self.enemies:
+                if enemy.properties.get("name", "") == "IE":
+                    ie_alive = True
+                    break
+
+            if self.level == 3 and ie_alive:
+                self._speak_random(BOSS_FIGHT_TEXTS, IDLE_TEXT_DURATION)
+            else:
+                self._speak_random(IDLE_TEXTS, IDLE_TEXT_DURATION)
             self.last_command_time = time() + IDLE_TEXT_DURATION
 
     def get_game_time(self) -> int:
