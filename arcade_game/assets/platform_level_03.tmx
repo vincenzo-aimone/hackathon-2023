@@ -157,28 +157,28 @@
     <property name="display" value="block"/>
    </properties>
   </object>
-  <object id="37" gid="222" x="3592.32" y="2410.38" width="128" height="128" visible="0">
+  <object id="37" gid="222" x="2937.77" y="2816.44" width="128" height="128">
    <properties>
     <property name="display" value="none"/>
     <property name="priority" value="1"/>
     <property name="slow" value="0.8"/>
    </properties>
   </object>
-  <object id="38" gid="222" x="4103.34" y="2424.77" width="128" height="128" visible="0">
+  <object id="38" gid="222" x="3709.4" y="2430.83" width="128" height="128">
    <properties>
     <property name="display" value="none"/>
     <property name="priority" value="3"/>
     <property name="slow" value="0.8"/>
    </properties>
   </object>
-  <object id="39" gid="222" x="3844.23" y="2403.18" width="128" height="128" visible="0">
+  <object id="39" gid="222" x="3456.35" y="2430.45" width="128" height="128">
    <properties>
     <property name="display" value="none"/>
     <property name="priority" value="2"/>
     <property name="slow" value="0.8"/>
    </properties>
   </object>
-  <object id="40" gid="222" x="4391.24" y="2417.58" width="128" height="128" visible="0">
+  <object id="40" gid="222" x="3976.09" y="2432.73" width="128" height="128">
    <properties>
     <property name="display" value="none"/>
     <property name="priority" value="4"/>
