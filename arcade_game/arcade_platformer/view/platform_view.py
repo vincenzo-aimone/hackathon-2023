@@ -98,6 +98,7 @@ class PlatformerView(arcade.View):
         self.level_victory_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "level_victory.wav"))
         self.death_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "death.wav"))
         self.boss_music = arcade.load_sound(str(ASSETS_PATH / "sounds" / "sound_of_silence.wav"))
+        self.ie_death_sound = arcade.load_sound(str(ASSETS_PATH / "sounds" / "win_shut_down.wav"))
 
     def _init_speech_recognizer(self):
         # Init object for the process
@@ -174,11 +175,12 @@ class PlatformerView(arcade.View):
                                 self.effects.remove(effect)
                         self.game_player.stop()
                         self._speak_random(IE_KILLED_TEXTS, force=True)
+                        arcade.play_sound(self.ie_death_sound)
                     elif enemy_hit[0].properties.get("name", "") != "IE":
                         self._speak_random(ENEMY_KILLED_TEXTS, force=True)
 
-                    # play the enemy death sound
-                    arcade.play_sound(self.death_sound)
+                        # play the enemy death sound
+                        arcade.play_sound(self.death_sound)
             else:
                 # if enemy has slow property, update the player speed multiplier
                 if "slow" in enemy_hit[0].properties:
